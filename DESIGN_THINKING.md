@@ -4,26 +4,19 @@
 
 Central concepts: Basket, Item, Discount.
 
-### Basket
-
-- is a collection of items (each having a standard price)
-- has a sum total equel to the sum of the individual item prices minus any applied discount
-
-### Item
-
-- has a standard price
-
-### Item-Basket
-
-- an item can be added or removed from the basket
-
-### Discount
-
-- an amount to be subtracted from the total of the basket
-- a rule that may apply to:
-  - individual items
-  - some groups of items
-  - may be time sensitive
+- Basket
+  - is a collection of items (each having a standard price)
+  - has a sum total equel to the sum of the individual item prices minus any applied discount
+- Item
+  - has a standard price
+- Item-Basket
+  - an item can be added or removed from the basket
+- Discount
+  - an amount to be subtracted from the total of the basket
+  - a rule that may apply to:
+    - individual items
+    - some groups of items
+    - may be time sensitive
 
 ### Observations
 

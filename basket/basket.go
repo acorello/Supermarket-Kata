@@ -29,7 +29,7 @@ func NewBasket(catalog item.Catalog) Basket {
 // error if quantity <= 0
 func (my *Basket) Add(itemId item.Id, quantity int) (int, error) {
 	if !my.catalogHas(itemId) {
-		return 0, fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
+		return 0, fmt.Errorf("item not found in catalog: %#v", itemId)
 	}
 	if quantity <= 0 {
 		return 0, fmt.Errorf("quantity <= 0: %d", quantity)

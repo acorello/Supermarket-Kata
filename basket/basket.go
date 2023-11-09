@@ -12,13 +12,19 @@ type Basket struct {
 }
 
 // must be >= 0
-type Quantity uint
+type Quantity struct {
+	uint
+}
 
-func QuantityOfInt(q int) (Quantity, error) {
+func (q Quantity) Add(o Quantity) Quantity {
+	return Quantity{q.uint + o.uint}
+}
+
+func QuantityOf(q int) (Quantity, error) {
 	if q <= 0 {
-		return 0, fmt.Errorf("quantity <= 0: %d", q)
+		return Quantity{0}, fmt.Errorf("quantity <= 0: %d", q)
 	}
-	return Quantity(uint(q)), nil
+	return Quantity{uint(q)}, nil
 }
 
 func NewBasket(catalog item.Catalog) Basket {
@@ -36,14 +42,11 @@ func NewBasket(catalog item.Catalog) Basket {
 // error != nil if itemId not in catalog
 func (my *Basket) Add(itemId item.Id, qty Quantity) (Quantity, error) {
 	if !my.catalogHas(itemId) {
-		return 0, fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
+		return Quantity{0}, fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
 	}
-	return my.add(itemId, qty), nil
-}
-
-func (my *Basket) add(itemId item.Id, qty Quantity) Quantity {
-	my.items[itemId] += qty
-	return my.items[itemId]
+	q := my.items[itemId].Add(qty)
+	my.items[itemId] = q
+	return q, nil
 }
 
 func (my *Basket) catalogHas(itemId item.Id) bool {

@@ -17,7 +17,7 @@ func TestBasket_adding_unkown_item_returns_error(t *testing.T) {
 
 	basket := basket.NewBasket(catalog)
 
-	_, err := basket.Add("item-not-in-catalog", 1)
+	_, err := basket.Add("item-not-in-catalog", quantity(1))
 	assert.Error(t, err)
 }
 
@@ -26,10 +26,10 @@ func TestBasket_quantity_less_than_one_errors(t *testing.T) {
 
 	var err error
 
-	_, err = basket.QuantityOfInt(0)
+	_, err = basket.QuantityOf(0)
 	assert.Error(t, err)
 
-	_, err = basket.QuantityOfInt(-1)
+	_, err = basket.QuantityOf(-1)
 	assert.Error(t, err)
 }
 
@@ -38,22 +38,27 @@ func TestBasket_adding_an_item_multiple_times_incr_quantity(t *testing.T) {
 
 	aBasket := basket.NewBasket(catalog)
 
-	var got basket.Quantity
-	var err error
-
-	got, err = aBasket.Add(anItem.Id, 1)
+	var got, err = aBasket.Add(anItem.Id, quantity(1))
 	assert.NoError(t, err)
-	assert.Equal(t, 1, got)
+	assert.Equal(t, quantity(1), got)
 
-	got, err = aBasket.Add(anItem.Id, 2)
+	got, err = aBasket.Add(anItem.Id, quantity(2))
 	assert.NoError(t, err)
-	assert.Equal(t, 3, got)
+	assert.Equal(t, quantity(3), got)
 }
 
 func TestQuantityOfInt_returns_error_if_LE_zero(t *testing.T) {
 	var err error
-	_, err = basket.QuantityOfInt(0)
+	_, err = basket.QuantityOf(0)
 	assert.Error(t, err)
-	_, err = basket.QuantityOfInt(-1)
+	_, err = basket.QuantityOf(-1)
 	assert.Error(t, err)
+}
+
+func quantity(q int) basket.Quantity {
+	if v, err := basket.QuantityOf(q); err != nil {
+		panic(err)
+	} else {
+		return v
+	}
 }

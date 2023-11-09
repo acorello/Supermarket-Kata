@@ -10,7 +10,7 @@ import (
 )
 
 var catalog item.Catalog = test_fixtures.Catalog()
-var anItem = catalog.FetchRandomItems(1)[0]
+var anItem = catalog.RandomItem()
 
 func TestBasket_adding_unkown_item_returns_error(t *testing.T) {
 	t.Parallel()

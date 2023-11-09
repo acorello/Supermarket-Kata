@@ -2,7 +2,6 @@ package basket
 
 import (
 	"fmt"
-	"log"
 
 	"dev.acorello.it/go/supermarket-kata/item"
 )
@@ -22,24 +21,23 @@ type Basket struct {
 	items   map[item.Id]int
 }
 
-func (my Basket) ItemsCount() int {
-	return len(my.items)
-}
-
-func (my *Basket) Add(itemId item.Id, qty int) error {
-	if _, found := my.catalog[itemId]; !found {
-		return fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
+// Add increments the quantity of itemId by `qty` amount; returns updated quantity.
+//
+// error != nil
+//   - if itemId not in catalog
+//   - if qty < 1
+func (my *Basket) Add(itemId item.Id, qty int) (int, error) {
+	if !my.catalogHas(itemId) {
+		return 0, fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
 	}
 	if qty < 1 {
-		return fmt.Errorf("quantity must be at least 1, got: %d", qty)
+		return 0, fmt.Errorf("quantity must be at least 1, got: %d", qty)
 	}
 	my.items[itemId] += qty
-	return nil
+	return my.items[itemId], nil
 }
 
-func (my *Basket) MustAdd(n item.Id, qty int) {
-	err := my.Add(n, qty)
-	if err != nil {
-		log.Fatal(err)
-	}
+func (my *Basket) catalogHas(itemId item.Id) bool {
+	_, found := my.catalog[itemId]
+	return found
 }

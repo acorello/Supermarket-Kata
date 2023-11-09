@@ -11,29 +11,23 @@ import (
 
 var catalog item.Catalog = test_fixtures.Catalog()
 
-func TestBasket_ItemCount(t *testing.T) {
-	basket := basket.NewBasket(catalog)
-	assert.Equalf(t, 0, basket.ItemsCount(), "new basket ItemCount should be zero")
-}
-
 func TestBasket_Add(t *testing.T) {
 	t.Parallel()
 
 	basket := basket.NewBasket(catalog)
+
 	Add := func(desc string, itemId item.Id, qty int, want int) {
 		t.Helper()
 		t.Logf(desc, itemId, qty)
-		if err := basket.Add(itemId, qty); err != nil {
+		if got, err := basket.Add(itemId, qty); err != nil {
 			t.Error()
-		}
-		got := basket.ItemsCount()
-		if want != got {
+		} else if got != want {
 			t.Fatalf("\n  want: %d\n   got: %d", want, got)
 		}
 	}
 
-	const id = "item-not-in-catalog"
-	assert.Error(t, basket.Add(id, 1))
+	_, err := basket.Add("item-not-in-catalog", 1)
+	assert.Error(t, err)
 
 	someItems := catalog.FetchRandomItems(2)
 	item1 := someItems[0]
@@ -41,7 +35,7 @@ func TestBasket_Add(t *testing.T) {
 
 	Add("emptyBasket.Add(%#v, %#v)", item1.Id, 1, 1)
 
-	Add("basketWithItem1.Add(%#v, %#v)", item1.Id, 1, 1)
+	Add("basketWithItem1.Add(%#v, %#v)", item1.Id, 1, 2)
 
-	Add("basketWithItem1x2.Add(%#v, %#v)", item2.Id, 1, 2)
+	Add("basketWithItem1x2.Add(%#v, %#v)", item2.Id, 1, 1)
 }

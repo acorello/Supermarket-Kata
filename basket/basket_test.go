@@ -10,32 +10,45 @@ import (
 )
 
 var catalog item.Catalog = test_fixtures.Catalog()
+var anItem = catalog.FetchRandomItems(1)[0]
 
-func TestBasket_Add(t *testing.T) {
+func TestBasket_adding_unkown_item_returns_error(t *testing.T) {
 	t.Parallel()
 
 	basket := basket.NewBasket(catalog)
 
-	Add := func(desc string, itemId item.Id, qty int, want int) {
-		t.Helper()
-		t.Logf(desc, itemId, qty)
-		if got, err := basket.Add(itemId, qty); err != nil {
-			t.Error()
-		} else if got != want {
-			t.Fatalf("\n  want: %d\n   got: %d", want, got)
-		}
-	}
-
 	_, err := basket.Add("item-not-in-catalog", 1)
 	assert.Error(t, err)
+}
 
-	someItems := catalog.FetchRandomItems(2)
-	item1 := someItems[0]
-	item2 := someItems[1]
+func TestBasket_adding_quantity_less_than_one_errors(t *testing.T) {
+	t.Parallel()
 
-	Add("emptyBasket.Add(%#v, %#v)", item1.Id, 1, 1)
+	basket := basket.NewBasket(catalog)
 
-	Add("basketWithItem1.Add(%#v, %#v)", item1.Id, 1, 2)
+	var err error
 
-	Add("basketWithItem1x2.Add(%#v, %#v)", item2.Id, 1, 1)
+	_, err = basket.Add(anItem.Id, 0)
+	assert.Error(t, err)
+
+	_, err = basket.Add(anItem.Id, -1)
+	assert.Error(t, err)
+
+}
+
+func TestBasket_adding_an_item_multiple_times_incr_quantity(t *testing.T) {
+	t.Parallel()
+
+	basket := basket.NewBasket(catalog)
+
+	var got int
+	var err error
+
+	got, err = basket.Add(anItem.Id, 1)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, got)
+
+	got, err = basket.Add(anItem.Id, 2)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, got)
 }

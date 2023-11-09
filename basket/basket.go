@@ -8,7 +8,17 @@ import (
 
 type Basket struct {
 	catalog item.Catalog
-	items   map[item.Id]int
+	items   map[item.Id]Quantity
+}
+
+// must be >= 0
+type Quantity uint
+
+func QuantityOfInt(q int) (Quantity, error) {
+	if q <= 0 {
+		return 0, fmt.Errorf("quantity <= 0: %d", q)
+	}
+	return Quantity(uint(q)), nil
 }
 
 func NewBasket(catalog item.Catalog) Basket {
@@ -17,26 +27,21 @@ func NewBasket(catalog item.Catalog) Basket {
 	}
 	return Basket{
 		catalog: catalog,
-		items:   make(map[item.Id]int),
+		items:   make(map[item.Id]Quantity),
 	}
 }
 
 // Add increments the quantity of itemId by `qty` amount; returns updated quantity.
 //
-// error != nil
-//   - if itemId not in catalog
-//   - if qty < 1
-func (my *Basket) Add(itemId item.Id, qty int) (int, error) {
+// error != nil if itemId not in catalog
+func (my *Basket) Add(itemId item.Id, qty Quantity) (Quantity, error) {
 	if !my.catalogHas(itemId) {
 		return 0, fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
-	}
-	if qty < 1 {
-		return 0, fmt.Errorf("quantity must be at least 1, got: %d", qty)
 	}
 	return my.add(itemId, qty), nil
 }
 
-func (my *Basket) add(itemId item.Id, qty int) int {
+func (my *Basket) add(itemId item.Id, qty Quantity) Quantity {
 	my.items[itemId] += qty
 	return my.items[itemId]
 }

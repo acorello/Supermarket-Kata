@@ -33,8 +33,12 @@ func (my *Basket) Add(itemId item.Id, qty int) (int, error) {
 	if qty < 1 {
 		return 0, fmt.Errorf("quantity must be at least 1, got: %d", qty)
 	}
+	return my.add(itemId, qty), nil
+}
+
+func (my *Basket) add(itemId item.Id, qty int) int {
 	my.items[itemId] += qty
-	return my.items[itemId], nil
+	return my.items[itemId]
 }
 
 func (my *Basket) catalogHas(itemId item.Id) bool {

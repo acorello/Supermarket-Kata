@@ -6,6 +6,11 @@ import (
 	"dev.acorello.it/go/supermarket-kata/item"
 )
 
+type Basket struct {
+	catalog item.Catalog
+	items   map[item.Id]int
+}
+
 func NewBasket(catalog item.Catalog) Basket {
 	if catalog == nil {
 		panic("nil ItemCatalog")
@@ -14,11 +19,6 @@ func NewBasket(catalog item.Catalog) Basket {
 		catalog: catalog,
 		items:   make(map[item.Id]int),
 	}
-}
-
-type Basket struct {
-	catalog item.Catalog
-	items   map[item.Id]int
 }
 
 // Add increments the quantity of itemId by `qty` amount; returns updated quantity.

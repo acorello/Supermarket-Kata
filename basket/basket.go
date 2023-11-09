@@ -12,28 +12,32 @@ func NewBasket(catalog item.Catalog) Basket {
 		panic("nil ItemCatalog")
 	}
 	return Basket{
-		itemCatalog: catalog,
-		items:       make(map[item.Id]uint),
+		catalog: catalog,
+		items:   make(map[item.Id]int),
 	}
 }
 
 type Basket struct {
-	itemCatalog item.Catalog
-	items       map[item.Id]uint
+	catalog item.Catalog
+	items   map[item.Id]int
 }
 
 func (my Basket) ItemsCount() int {
 	return len(my.items)
 }
 
-func (my *Basket) Add(itemId item.Id, qty uint) error {
-	if _, found := my.itemCatalog[itemId]; !found {
+func (my *Basket) Add(itemId item.Id, qty int) error {
+	if _, found := my.catalog[itemId]; !found {
 		return fmt.Errorf("item not found in catalog: item.Id(%q)", itemId)
+	}
+	if qty < 1 {
+		return fmt.Errorf("quantity must be at least 1, got: %d", qty)
 	}
 	my.items[itemId] += qty
 	return nil
 }
-func (my *Basket) MustAdd(n item.Id, qty uint) {
+
+func (my *Basket) MustAdd(n item.Id, qty int) {
 	err := my.Add(n, qty)
 	if err != nil {
 		log.Fatal(err)

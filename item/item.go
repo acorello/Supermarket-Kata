@@ -20,8 +20,8 @@ func (me Catalog) FetchRandomItems(count int) (result []Item) {
 	if count < 0 {
 		log.Fatalf("can't return %d items", count)
 	}
-	if count > me.Len() {
-		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.Len())
+	if count > me.len() {
+		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.len())
 	}
 	for _, item := range me {
 		result = append(result, item)
@@ -29,7 +29,7 @@ func (me Catalog) FetchRandomItems(count int) (result []Item) {
 	return result
 }
 
-func (me Catalog) Len() int {
+func (me Catalog) len() int {
 	return len(me)
 }
 

@@ -38,14 +38,26 @@ func NewBasket(catalog item.Catalog) Basket {
 	}
 }
 
-// Add increments the quantity of itemId by `qty` amount; returns updated quantity.
-//
-// error if itemId not in catalog
-//
-// error if quantity <= 0
-func (my *Basket) Add(itemId knownItem, quantity quantity) int {
-	my.items[itemId.Id] += quantity.int
+// Add increments the quantity of itemId by given amount; returns updated quantity.
+func (my *Basket) Add(itemId knownItem, qty quantity) int {
+	my.items[itemId.Id] += qty.int
 	return my.items[itemId.Id]
+}
+
+// Remove decrements the quantity of itemId by given amount.
+// If given amount is greater or equal to the amount in basket the item is comletely removed.
+//
+// Returns updated quantity.
+func (my *Basket) Remove(itemId knownItem, qty quantity) int {
+	q := my.items[itemId.Id]
+	r := q - qty.int
+	if r < 0 {
+		delete(my.items, itemId.Id)
+		return 0
+	} else {
+		my.items[itemId.Id] = r
+		return r
+	}
 }
 
 func (my *Basket) Total() money.Cents {

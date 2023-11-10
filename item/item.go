@@ -26,7 +26,7 @@ func (me Catalog) RandomItem() Item {
 	panic("what are you doing here?!?")
 }
 
-func (me Catalog) FetchRandomItems(count int) (result []Item) {
+func (me Catalog) RandomItems(count int) (result []Item) {
 	if count < 0 {
 		log.Fatalf("can't return %d items", count)
 	}

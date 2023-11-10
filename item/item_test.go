@@ -14,7 +14,7 @@ func TestCatalog_RandomItems(t *testing.T) {
 	wanted := 1
 	require.GreaterOrEqual(t, catalog.Len(), wanted)
 
-	items := catalog.FetchRandomItems(wanted)
+	items := catalog.RandomItems(wanted)
 	got := len(items)
 
 	assert.Equal(t, wanted, got)

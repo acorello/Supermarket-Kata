@@ -19,6 +19,10 @@ func Quantity(v int) (quantity, error) {
 	return quantity{v}, nil
 }
 
+type knownItem struct {
+	item.Id
+}
+
 type Basket struct {
 	catalog item.Catalog
 	items   map[item.Id]int
@@ -39,12 +43,9 @@ func NewBasket(catalog item.Catalog) Basket {
 // error if itemId not in catalog
 //
 // error if quantity <= 0
-func (my *Basket) Add(itemId item.Id, quantity quantity) (int, error) {
-	if !my.catalogHas(itemId) {
-		return 0, fmt.Errorf("item not found in catalog: %#v", itemId)
-	}
-	my.items[itemId] += quantity.int
-	return my.items[itemId], nil
+func (my *Basket) Add(itemId knownItem, quantity quantity) int {
+	my.items[itemId.Id] += quantity.int
+	return my.items[itemId.Id]
 }
 
 func (my *Basket) Total() money.Cents {
@@ -54,6 +55,13 @@ func (my *Basket) Total() money.Cents {
 		total += i.Price.Mul(qty)
 	}
 	return total
+}
+
+func (my *Basket) KnownItemId(id item.Id) (knownItem, error) {
+	if !my.catalogHas(id) {
+		return knownItem{}, fmt.Errorf("item not in catalog %q", id)
+	}
+	return knownItem{id}, nil
 }
 
 func (my *Basket) catalogHas(itemId item.Id) bool {

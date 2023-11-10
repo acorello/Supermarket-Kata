@@ -4,23 +4,21 @@ import (
 	"testing"
 
 	"dev.acorello.it/go/supermarket-kata/basket"
-	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/must"
 	"dev.acorello.it/go/supermarket-kata/test_fixtures"
 	"github.com/stretchr/testify/assert"
 )
 
-var catalog item.Catalog = test_fixtures.Catalog()
-var anItem = catalog.RandomItem()
+var catalog = test_fixtures.Catalog()
 
 var qty = must.Fn(basket.Quantity)
 
-func TestBasket_adding_unkown_item_returns_error(t *testing.T) {
+func TestBasketKnownItem(t *testing.T) {
 	t.Parallel()
 
 	b := basket.NewBasket(catalog)
 
-	_, err := b.Add("item-not-in-catalog", qty(1))
+	_, err := b.KnownItemId("item-not-in-catalog")
 	assert.Error(t, err)
 }
 
@@ -28,13 +26,13 @@ func TestBasket_adding_an_item_multiple_times_incr_quantity(t *testing.T) {
 	t.Parallel()
 
 	aBasket := basket.NewBasket(catalog)
+	anItem := catalog.RandomItem()
+	anItemId := must.Work(aBasket.KnownItemId(anItem.Id))
 
-	var got, err = aBasket.Add(anItem.Id, qty(1))
-	assert.NoError(t, err)
+	var got = aBasket.Add(anItemId, qty(1))
 	assert.Equal(t, 1, got)
 
-	got, err = aBasket.Add(anItem.Id, qty(2))
-	assert.NoError(t, err)
+	got = aBasket.Add(anItemId, qty(2))
 	assert.Equal(t, 3, got)
 }
 
@@ -42,7 +40,9 @@ func TestBasket_Total(t *testing.T) {
 	t.Parallel()
 
 	aBasket := basket.NewBasket(catalog)
+	anItem := catalog.RandomItem()
+	anItemId := must.Work(aBasket.KnownItemId(anItem.Id))
 
-	q, _ := aBasket.Add(anItem.Id, qty(2))
+	q := aBasket.Add(anItemId, qty(2))
 	assert.Equal(t, anItem.Price.Mul(q), aBasket.Total())
 }

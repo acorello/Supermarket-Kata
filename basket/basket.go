@@ -11,14 +11,6 @@ type quantity struct {
 	int
 }
 
-func Qty(v int) quantity {
-	if q, e := Quantity(v); e != nil {
-		panic(e)
-	} else {
-		return q
-	}
-}
-
 func Quantity(v int) (quantity, error) {
 	var z quantity
 	if v <= 0 {

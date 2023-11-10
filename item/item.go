@@ -17,13 +17,7 @@ type Item struct {
 type Catalog map[Id]Item
 
 func (me Catalog) RandomItem() Item {
-	if me.Len() == 0 {
-		log.Fatalf("empty catalog")
-	}
-	for _, item := range me {
-		return item
-	}
-	panic("what are you doing here?!?")
+	return me.RandomItems(1)[0]
 }
 
 func (me Catalog) RandomItems(count int) (result []Item) {

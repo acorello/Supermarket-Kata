@@ -17,7 +17,7 @@ type Item struct {
 type Catalog map[Id]Item
 
 func (me Catalog) RandomItem() Item {
-	if me.len() == 0 {
+	if me.Len() == 0 {
 		log.Fatalf("empty catalog")
 	}
 	for _, item := range me {
@@ -30,16 +30,20 @@ func (me Catalog) FetchRandomItems(count int) (result []Item) {
 	if count < 0 {
 		log.Fatalf("can't return %d items", count)
 	}
-	if count > me.len() {
-		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.len())
+	if count > me.Len() {
+		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.Len())
 	}
 	for _, item := range me {
 		result = append(result, item)
+		count--
+		if count <= 0 {
+			break
+		}
 	}
 	return result
 }
 
-func (me Catalog) len() int {
+func (me Catalog) Len() int {
 	return len(me)
 }
 

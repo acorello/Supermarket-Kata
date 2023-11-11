@@ -66,11 +66,11 @@ func (my *Basket) Total() money.Cents {
 	return total
 }
 
-// `basket.itemId` is an `item.Id` that's present in the Basket's `item.Catalog`
 type itemId struct {
 	value item.Id
 }
 
+// [ItemIdInCatalog] returns an [itemId] if given [item.Id] is present in Basket's [item.Catalog], error otherwise.
 func (my *Basket) ItemIdInCatalog(id item.Id) (itemId, error) {
 	if !my.catalog.Has(id) {
 		return itemId{}, fmt.Errorf("item not in catalog %q", id)

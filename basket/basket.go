@@ -20,13 +20,18 @@ func Quantity(v int) (quantity, error) {
 }
 
 type Basket struct {
-	catalog item.Catalog
+	catalog Catalog
 	items   map[item.Id]int
 }
 
-func NewBasket(catalog item.Catalog) Basket {
-	if catalog.Len() == 0 {
-		panic("empty catalog")
+type Catalog interface {
+	Get(id item.Id) (item.Item, bool)
+	Has(id item.Id) bool
+}
+
+func NewBasket(catalog Catalog) Basket {
+	if catalog == nil {
+		panic("nil catalog")
 	}
 	return Basket{
 		catalog: catalog,

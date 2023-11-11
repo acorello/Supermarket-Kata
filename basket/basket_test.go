@@ -18,7 +18,7 @@ func TestBasketKnownItem(t *testing.T) {
 
 	b := basket.NewBasket(catalog)
 
-	_, err := b.KnownItemId("item-not-in-catalog")
+	_, err := b.ItemIdInCatalog("item-not-in-catalog")
 	assert.Error(t, err)
 }
 
@@ -27,7 +27,7 @@ func TestBasket_Put(t *testing.T) {
 
 	aBasket := basket.NewBasket(catalog)
 	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.KnownItemId(anItem.Id))
+	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
 
 	var got = aBasket.Put(anItemId, qty(1))
 	assert.Equal(t, 1, got)
@@ -41,7 +41,7 @@ func TestBasketRemove(t *testing.T) {
 
 	aBasket := basket.NewBasket(catalog)
 	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.KnownItemId(anItem.Id))
+	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
 
 	var got = aBasket.Put(anItemId, qty(2))
 	assert.Equal(t, 2, got)
@@ -61,7 +61,7 @@ func TestBasket_Total(t *testing.T) {
 
 	aBasket := basket.NewBasket(catalog)
 	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.KnownItemId(anItem.Id))
+	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
 
 	q := aBasket.Put(anItemId, qty(2))
 	assert.Equal(t, anItem.Price.Mul(q), aBasket.Total())

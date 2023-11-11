@@ -19,10 +19,6 @@ func Quantity(v int) (quantity, error) {
 	return quantity{v}, nil
 }
 
-type knownItem struct {
-	item.Id
-}
-
 type Basket struct {
 	catalog item.Catalog
 	items   map[item.Id]int
@@ -39,23 +35,24 @@ func NewBasket(catalog item.Catalog) Basket {
 }
 
 // Put increments the quantity of itemId by given amount; returns updated quantity.
-func (my *Basket) Put(itemId knownItem, qty quantity) int {
-	my.items[itemId.Id] += qty.int
-	return my.items[itemId.Id]
+func (my *Basket) Put(id itemId, qty quantity) int {
+	my.items[id.value] += qty.int
+	return my.items[id.value]
 }
 
-// Remove decrements the quantity of itemId by given amount.
-// If given amount is greater or equal to the amount in basket the item is comletely removed.
+// Remove decrements of given item by given quantity.
+// If quantity of items in basket reaches zero the item is removed.
+// Removing more items than present in basket is equivalent to removing all of them.
 //
 // Returns updated quantity.
-func (my *Basket) Remove(itemId knownItem, qty quantity) int {
-	q := my.items[itemId.Id]
+func (my *Basket) Remove(id itemId, qty quantity) int {
+	q := my.items[id.value]
 	r := q - qty.int
 	if r < 0 {
-		delete(my.items, itemId.Id)
+		delete(my.items, id.value)
 		return 0
 	} else {
-		my.items[itemId.Id] = r
+		my.items[id.value] = r
 		return r
 	}
 }
@@ -69,14 +66,14 @@ func (my *Basket) Total() money.Cents {
 	return total
 }
 
-func (my *Basket) KnownItemId(id item.Id) (knownItem, error) {
-	if !my.catalogHas(id) {
-		return knownItem{}, fmt.Errorf("item not in catalog %q", id)
-	}
-	return knownItem{id}, nil
+// `basket.itemId` is an `item.Id` that's present in the Basket's `item.Catalog`
+type itemId struct {
+	value item.Id
 }
 
-func (my *Basket) catalogHas(itemId item.Id) bool {
-	_, found := my.catalog.Get(itemId)
-	return found
+func (my *Basket) ItemIdInCatalog(id item.Id) (itemId, error) {
+	if !my.catalog.Has(id) {
+		return itemId{}, fmt.Errorf("item not in catalog %q", id)
+	}
+	return itemId{id}, nil
 }

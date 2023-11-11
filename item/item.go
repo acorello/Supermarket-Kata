@@ -39,6 +39,11 @@ func (me Catalog) RandomItems(count int) (result []Item) {
 	return result
 }
 
+func (me Catalog) Has(id Id) bool {
+	_, found := me.items[id]
+	return found
+}
+
 func (me Catalog) Get(id Id) (Item, bool) {
 	i, found := me.items[id]
 	return i, found

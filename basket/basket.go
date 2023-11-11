@@ -38,8 +38,8 @@ func NewBasket(catalog item.Catalog) Basket {
 	}
 }
 
-// Add increments the quantity of itemId by given amount; returns updated quantity.
-func (my *Basket) Add(itemId knownItem, qty quantity) int {
+// Put increments the quantity of itemId by given amount; returns updated quantity.
+func (my *Basket) Put(itemId knownItem, qty quantity) int {
 	my.items[itemId.Id] += qty.int
 	return my.items[itemId.Id]
 }

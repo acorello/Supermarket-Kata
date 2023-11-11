@@ -14,7 +14,9 @@ type Item struct {
 	Unit  string
 }
 
-type Catalog map[Id]Item
+type Catalog struct {
+	items map[Id]Item
+}
 
 func (me Catalog) RandomItem() Item {
 	return me.RandomItems(1)[0]
@@ -27,7 +29,7 @@ func (me Catalog) RandomItems(count int) (result []Item) {
 	if count > me.Len() {
 		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.Len())
 	}
-	for _, item := range me {
+	for _, item := range me.items {
 		result = append(result, item)
 		count--
 		if count <= 0 {
@@ -37,8 +39,13 @@ func (me Catalog) RandomItems(count int) (result []Item) {
 	return result
 }
 
+func (me Catalog) Get(id Id) (Item, bool) {
+	i, found := me.items[id]
+	return i, found
+}
+
 func (me Catalog) Len() int {
-	return len(me)
+	return len(me.items)
 }
 
 func NewCatalog(items ...Item) Catalog {
@@ -46,5 +53,5 @@ func NewCatalog(items ...Item) Catalog {
 	for _, i := range items {
 		catalog[i.Id] = i
 	}
-	return catalog
+	return Catalog{catalog}
 }

@@ -29,8 +29,8 @@ type Basket struct {
 }
 
 func NewBasket(catalog item.Catalog) Basket {
-	if catalog == nil {
-		panic("nil ItemCatalog")
+	if catalog.Len() == 0 {
+		panic("empty catalog")
 	}
 	return Basket{
 		catalog: catalog,
@@ -63,7 +63,7 @@ func (my *Basket) Remove(itemId knownItem, qty quantity) int {
 func (my *Basket) Total() money.Cents {
 	var total money.Cents
 	for id, qty := range my.items {
-		i := my.catalog[id]
+		i, _ := my.catalog.Get(id)
 		total += i.Price.Mul(qty)
 	}
 	return total
@@ -77,6 +77,6 @@ func (my *Basket) KnownItemId(id item.Id) (knownItem, error) {
 }
 
 func (my *Basket) catalogHas(itemId item.Id) bool {
-	_, found := my.catalog[itemId]
+	_, found := my.catalog.Get(itemId)
 	return found
 }

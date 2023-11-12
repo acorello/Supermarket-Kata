@@ -11,6 +11,8 @@ type quantity struct {
 	int
 }
 
+// TODO: add upper bound of 100
+// TODO: in Put or Remove, either skip or panic if we get a quantity of zero
 func Quantity(v int) (quantity, error) {
 	var z quantity
 	if v <= 0 {
@@ -40,9 +42,8 @@ func NewBasket(catalog Catalog) Basket {
 }
 
 // Put increments the quantity of itemId by given amount; returns updated quantity.
-func (my *Basket) Put(id itemId, qty quantity) int {
+func (my *Basket) Put(id itemId, qty quantity) {
 	my.items[id.value] += qty.int
-	return my.items[id.value]
 }
 
 // Remove decrements of given item by given quantity.
@@ -50,15 +51,13 @@ func (my *Basket) Put(id itemId, qty quantity) int {
 // Removing more items than present in basket is equivalent to removing all of them.
 //
 // Returns updated quantity.
-func (my *Basket) Remove(id itemId, qty quantity) int {
+func (my *Basket) Remove(id itemId, qty quantity) {
 	q := my.items[id.value]
 	r := q - qty.int
-	if r < 0 {
+	if r < 1 {
 		delete(my.items, id.value)
-		return 0
 	} else {
 		my.items[id.value] = r
-		return r
 	}
 }
 
@@ -66,7 +65,7 @@ func (my *Basket) Total() money.Cents {
 	var total money.Cents
 	for id, qty := range my.items {
 		i, _ := my.catalog.Get(id)
-		total += i.Price.Mul(qty)
+		total += money.Cents(int(i.Price) * qty)
 	}
 	return total
 }

@@ -1,68 +1,81 @@
 package basket_test
 
 import (
+	"math"
 	"testing"
 
 	"dev.acorello.it/go/supermarket-kata/basket"
+	"dev.acorello.it/go/supermarket-kata/money"
 	"dev.acorello.it/go/supermarket-kata/must"
 	"dev.acorello.it/go/supermarket-kata/test_fixtures"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+const zeroCents = money.Cents(0)
 
 var catalog = test_fixtures.Catalog()
 
 var qty = must.Fn(basket.Quantity)
 
-func TestBasketKnownItem(t *testing.T) {
-	t.Parallel()
+// shorhand for sub-test function signatures
+type T = *testing.T
 
-	b := basket.NewBasket(catalog)
+func TestBasket(t *testing.T) {
+	_basket := basket.NewBasket(catalog)
 
-	_, err := b.ItemIdInCatalog("item-not-in-catalog")
-	assert.Error(t, err)
-}
+	t.Log("reports if an item.Id is not in its catalog")
+	_, err := _basket.ItemIdInCatalog("item-not-in-catalog")
+	require.Error(t, err)
 
-func TestBasket_Put(t *testing.T) {
-	t.Parallel()
-
-	aBasket := basket.NewBasket(catalog)
+	t.Log("returns a basket.ItemId if an item.Id is in its catalog")
 	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
+	// assuming anItem is immutable: sub-tests are reading it
+	anItemId, err := _basket.ItemIdInCatalog(anItem.Id)
+	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
 
-	var got = aBasket.Put(anItemId, qty(1))
-	assert.Equal(t, 1, got)
+	t.Log("rejects invalid quantities")
+	for _, q := range []int{math.MinInt, -1, 0} {
+		_, err := basket.Quantity(q)
+		require.Error(t, err, "Basket has accepted a quantity of %d", q)
+	}
 
-	got = aBasket.Put(anItemId, qty(2))
-	assert.Equal(t, 3, got)
-}
+	t.Log("accepts valid quantities")
+	for q := 1; q < 100; q++ {
+		_, err := basket.Quantity(q)
+		require.NoError(t, err, "Basket has accepted a quantity of %d", q)
+	}
 
-func TestBasketRemove(t *testing.T) {
-	t.Parallel()
+	t.Run("Total() changes as we change an item quantity", func(t T) {
+		b := _basket
+		require.GreaterOrEqual(t, anItem.Price, 1, "selected item has .Price < 1")
+		t.Parallel()
 
-	aBasket := basket.NewBasket(catalog)
-	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
+		require.Equal(t, zeroCents, b.Total(), "empty basket total should be zero")
 
-	var got = aBasket.Put(anItemId, qty(2))
-	assert.Equal(t, 2, got)
+		b.Put(anItemId, qty(1))
+		require.Equal(t, anItem.Price, b.Total())
 
-	got = aBasket.Remove(anItemId, qty(1))
-	assert.Equal(t, 1, got)
+		b.Put(anItemId, qty(2))
+		require.Equal(t, anItem.Price*3, b.Total())
 
-	got = aBasket.Remove(anItemId, qty(1))
-	assert.Equal(t, 0, got)
+		b.Remove(anItemId, qty(1))
+		require.Equal(t, anItem.Price*2, b.Total())
 
-	got = aBasket.Remove(anItemId, qty(1))
-	assert.Equal(t, 0, got)
-}
+		b.Remove(anItemId, qty(2))
+		require.Equal(t, zeroCents, b.Total())
 
-func TestBasket_Total(t *testing.T) {
-	t.Parallel()
+		b.Remove(anItemId, qty(1))
+		require.Equal(t, zeroCents, b.Total(), "removing an item from an empty basket doesn't change the total")
+	})
 
-	aBasket := basket.NewBasket(catalog)
-	anItem := catalog.RandomItem()
-	anItemId := must.Work(aBasket.ItemIdInCatalog(anItem.Id))
+	t.Run("removing an item from an empty basket doesn't change the total", func(t *testing.T) {
+		b := _basket
+		t.Parallel()
 
-	q := aBasket.Put(anItemId, qty(2))
-	assert.Equal(t, anItem.Price.Mul(q), aBasket.Total())
+		anItem := catalog.RandomItem()
+		anItemId := must.Work(b.ItemIdInCatalog(anItem.Id))
+
+		b.Remove(anItemId, qty(1))
+		require.Equal(t, zeroCents, b.Total())
+	})
 }

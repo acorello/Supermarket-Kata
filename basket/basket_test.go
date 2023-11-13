@@ -1,6 +1,8 @@
 package basket_test
 
 import (
+	"fmt"
+	"io"
 	"math"
 	"testing"
 
@@ -15,7 +17,7 @@ const zeroCents = money.Cents(0)
 
 var catalog = test_fixtures.Catalog()
 
-var qty = must.Fn(basket.Quantity)
+var qty = must.DereFn(basket.Quantity)
 
 // shorhand for sub-test function signatures
 type T = *testing.T
@@ -28,16 +30,24 @@ func TestBasket(t *testing.T) {
 	require.Error(t, err)
 
 	t.Log("returns a basket.ItemId if an item.Id is in its catalog")
-	anItem := catalog.RandomItem()
 	// assuming anItem is immutable: sub-tests are reading it
-	anItemId, err := _basket.ItemIdInCatalog(anItem.Id)
+	anItem := catalog.RandomItem()
+	anItemId_, err := _basket.ItemIdInCatalog(anItem.Id)
 	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
+	anItemId := *anItemId_
 
-	t.Log("rejects invalid quantities")
-	for _, q := range []int{math.MinInt, -1, 0} {
-		_, err := basket.Quantity(q)
-		require.Error(t, err, "Basket has accepted a quantity of %d", q)
-	}
+	t.Run("rejects invalid quantities", func(t T) {
+		invalidQuantities := [...]int{math.MinInt, -1, 0}
+		for _, q := range invalidQuantities {
+			qPtr, err := basket.Quantity(q)
+
+			require.Panics(t, func() { fmt.Fprint(io.Discard, *qPtr) },
+				"returned non-nil quantity for %d", q)
+
+			require.Error(t, err,
+				"did not return an error for %d", q)
+		}
+	})
 
 	t.Log("accepts valid quantities")
 	for q := 1; q < 100; q++ {
@@ -73,22 +83,9 @@ func TestBasket(t *testing.T) {
 		t.Parallel()
 
 		anItem := catalog.RandomItem()
-		anItemId := must.Work(b.ItemIdInCatalog(anItem.Id))
+		anItemId := must.WorkPtr(b.ItemIdInCatalog(anItem.Id))
 
 		b.Remove(anItemId, qty(1))
 		require.Equal(t, zeroCents, b.Total())
-	})
-
-	t.Run("panic when using a nullish quantity", func(t *testing.T) {
-		b := _basket
-		t.Parallel()
-
-		anItem := catalog.RandomItem()
-		anItemId := must.Work(b.ItemIdInCatalog(anItem.Id))
-
-		doubiousQuantity, _ := basket.Quantity(-1)
-
-		require.Panics(t, func() { b.Put(anItemId, doubiousQuantity) }, "put panics")
-		require.Panics(t, func() { b.Remove(anItemId, doubiousQuantity) }, "remove panics")
 	})
 }

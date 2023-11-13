@@ -11,28 +11,12 @@ type quantity struct {
 	int
 }
 
-// it happens to be zero but it should really be treated as null
-var nullishQty quantity
-var nullishItemId itemId
-
-func (q quantity) panicIfNullish() {
-	if q == nullishQty {
-		panic("nullish quantity")
-	}
-}
-
-func (q itemId) panicIfNullish() {
-	if q == nullishItemId {
-		panic("nullish itemId")
-	}
-}
-
 // TODO: add upper bound of 100
-func Quantity(v int) (quantity, error) {
+func Quantity(v int) (*quantity, error) {
 	if v <= 0 {
-		return nullishQty, fmt.Errorf("Quantity <= 0: %v", v)
+		return nil, fmt.Errorf("Quantity <= 0: %v", v)
 	}
-	return quantity{v}, nil
+	return &quantity{v}, nil
 }
 
 type Basket struct {
@@ -57,8 +41,6 @@ func NewBasket(catalog Catalog) Basket {
 
 // Put increments the quantity of itemId by given amount; returns updated quantity.
 func (my *Basket) Put(id itemId, qty quantity) {
-	id.panicIfNullish()
-	qty.panicIfNullish()
 	my.items[id.value] += qty.int
 }
 
@@ -68,8 +50,6 @@ func (my *Basket) Put(id itemId, qty quantity) {
 //
 // Returns updated quantity.
 func (my *Basket) Remove(id itemId, qty quantity) {
-	id.panicIfNullish()
-	qty.panicIfNullish()
 	q := my.items[id.value]
 	r := q - qty.int
 	if r < 1 {
@@ -93,9 +73,9 @@ type itemId struct {
 }
 
 // [ItemIdInCatalog] returns an [itemId] if given [item.Id] is present in Basket's [item.Catalog], error otherwise.
-func (my *Basket) ItemIdInCatalog(id item.Id) (itemId, error) {
+func (my *Basket) ItemIdInCatalog(id item.Id) (*itemId, error) {
 	if !my.catalog.Has(id) {
-		return itemId{}, fmt.Errorf("item not in catalog %q", id)
+		return nil, fmt.Errorf("item not in catalog %q", id)
 	}
-	return itemId{id}, nil
+	return &itemId{id}, nil
 }

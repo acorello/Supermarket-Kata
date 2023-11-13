@@ -1,8 +1,6 @@
 package basket_test
 
 import (
-	"fmt"
-	"io"
 	"math"
 	"testing"
 
@@ -26,15 +24,19 @@ func TestBasket(t *testing.T) {
 	_basket := basket.NewBasket(catalog)
 
 	t.Log("reports if an item.Id is not in its catalog")
-	_, err := _basket.ItemIdInCatalog("item-not-in-catalog")
-	require.Error(t, err)
+	{
+		itemId, err := _basket.ItemIdInCatalog("item-not-in-catalog")
+		require.Error(t, err, "invalid item.Id passed validation")
+		require.Panics(t, func() { evalAndDiscard(*itemId) },
+			"non-nil basket.itemId returned for invalid item.Id")
+	}
 
 	t.Log("returns a basket.ItemId if an item.Id is in its catalog")
 	// assuming anItem is immutable: sub-tests are reading it
 	anItem := catalog.RandomItem()
-	anItemId_, err := _basket.ItemIdInCatalog(anItem.Id)
+	_anItemId, err := _basket.ItemIdInCatalog(anItem.Id)
 	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
-	anItemId := *anItemId_
+	anItemId := *_anItemId
 
 	const minQty, maxQty = 1, 99
 	someInvalidQuantities := [...]int{math.MinInt, math.MaxInt,
@@ -44,7 +46,7 @@ func TestBasket(t *testing.T) {
 	for _, q := range someInvalidQuantities {
 		qty, err := basket.Quantity(q)
 
-		require.Panics(t, func() { _qty := *qty; fmt.Fprint(io.Discard, _qty) },
+		require.Panics(t, func() { evalAndDiscard(*qty) },
 			"returned non-nil quantity for %d", q)
 
 		require.Error(t, err,
@@ -58,7 +60,7 @@ func TestBasket(t *testing.T) {
 		require.NoError(t, err,
 			"returned an error for %d", q)
 
-		require.NotPanics(t, func() { _qty := *qty; fmt.Fprint(io.Discard, _qty) },
+		require.NotPanics(t, func() { evalAndDiscard(*qty) },
 			"returned nil quantity for %d", q)
 	}
 
@@ -82,7 +84,8 @@ func TestBasket(t *testing.T) {
 		require.Equal(t, zeroCents, b.Total())
 
 		b.Remove(anItemId, qty(1))
-		require.Equal(t, zeroCents, b.Total(), "removing an item from an empty basket doesn't change the total")
+		require.Equal(t, zeroCents, b.Total(),
+			"removing an item from an empty basket doesn't change the total")
 	})
 
 	t.Run("removing an item from an empty basket doesn't change the total", func(t T) {
@@ -96,3 +99,5 @@ func TestBasket(t *testing.T) {
 		require.Equal(t, zeroCents, b.Total())
 	})
 }
+
+func evalAndDiscard(any) {}

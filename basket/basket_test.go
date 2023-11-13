@@ -36,23 +36,27 @@ func TestBasket(t *testing.T) {
 	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
 	anItemId := *anItemId_
 
-	t.Run("rejects invalid quantities", func(t T) {
-		invalidQuantities := [...]int{math.MinInt, -1, 0}
-		for _, q := range invalidQuantities {
-			qPtr, err := basket.Quantity(q)
+	t.Log("rejects invalid quantities")
+	invalidQuantities := [...]int{math.MinInt, -1, 0}
+	for _, q := range invalidQuantities {
+		qty, err := basket.Quantity(q)
 
-			require.Panics(t, func() { fmt.Fprint(io.Discard, *qPtr) },
-				"returned non-nil quantity for %d", q)
+		require.Panics(t, func() { _qty := *qty; fmt.Fprint(io.Discard, _qty) },
+			"returned non-nil quantity for %d", q)
 
-			require.Error(t, err,
-				"did not return an error for %d", q)
-		}
-	})
+		require.Error(t, err,
+			"did not return an error for %d", q)
+	}
 
 	t.Log("accepts valid quantities")
 	for q := 1; q < 100; q++ {
-		_, err := basket.Quantity(q)
-		require.NoError(t, err, "Basket has accepted a quantity of %d", q)
+		qty, err := basket.Quantity(q)
+
+		require.NoError(t, err,
+			"returned an error for %d", q)
+
+		require.NotPanics(t, func() { _qty := *qty; fmt.Fprint(io.Discard, _qty) },
+			"returned nil quantity for %d", q)
 	}
 
 	t.Run("Total() changes as we change an item quantity", func(t T) {
@@ -78,7 +82,7 @@ func TestBasket(t *testing.T) {
 		require.Equal(t, zeroCents, b.Total(), "removing an item from an empty basket doesn't change the total")
 	})
 
-	t.Run("removing an item from an empty basket doesn't change the total", func(t *testing.T) {
+	t.Run("removing an item from an empty basket doesn't change the total", func(t T) {
 		b := _basket
 		t.Parallel()
 

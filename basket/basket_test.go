@@ -68,9 +68,11 @@ func TestBasket(t *testing.T) {
 	}
 
 	t.Run("Total() changes as we change an item quantity", func(t T) {
-		b := _basket
-		require.GreaterOrEqual(t, anItem.Price, 1, "selected item has .Price < 1")
+		b := _basket // make copy, we're about to run concurrently!
 		t.Parallel()
+
+		require.NotEqual(t, anItem.Price, 0,
+			"if item.Price is zero the following tests would be false positives")
 
 		require.Equal(t, zeroCents, b.Total(), "empty basket total should be zero")
 

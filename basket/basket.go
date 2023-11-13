@@ -11,10 +11,10 @@ type quantity struct {
 	int
 }
 
-// TODO: add upper bound of 100
 func Quantity(v int) (*quantity, error) {
-	if v <= 0 {
-		return nil, fmt.Errorf("Quantity <= 0: %v", v)
+	const min, max = 1, 99
+	if v < min || v > max {
+		return nil, fmt.Errorf("Quantity q<=%d or q>%d. q==%v", v, min, max)
 	}
 	return &quantity{v}, nil
 }

@@ -36,9 +36,12 @@ func TestBasket(t *testing.T) {
 	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
 	anItemId := *anItemId_
 
-	t.Log("rejects invalid quantities")
-	invalidQuantities := [...]int{math.MinInt, -1, 0}
-	for _, q := range invalidQuantities {
+	const minQty, maxQty = 1, 99
+	someInvalidQuantities := [...]int{math.MinInt, math.MaxInt,
+		minQty - 2, minQty - 1, maxQty + 1, maxQty + 2,
+	}
+	t.Logf("rejects quantities ( q < %d or q > %d )", minQty, maxQty)
+	for _, q := range someInvalidQuantities {
 		qty, err := basket.Quantity(q)
 
 		require.Panics(t, func() { _qty := *qty; fmt.Fprint(io.Discard, _qty) },
@@ -48,8 +51,8 @@ func TestBasket(t *testing.T) {
 			"did not return an error for %d", q)
 	}
 
-	t.Log("accepts valid quantities")
-	for q := 1; q < 100; q++ {
+	t.Logf("accepts quantities ( %d <= q <= %d )", minQty, maxQty)
+	for q := minQty; q <= maxQty; q++ {
 		qty, err := basket.Quantity(q)
 
 		require.NoError(t, err,

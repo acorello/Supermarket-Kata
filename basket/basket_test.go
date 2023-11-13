@@ -21,6 +21,9 @@ var qty = must.DereFn(basket.Quantity)
 type T = *testing.T
 
 func TestBasket(t *testing.T) {
+	require.Panics(t, func() { basket.NewBasket(nil) },
+		"panic when given nil catalog")
+
 	_basket := basket.NewBasket(catalog)
 
 	t.Log("reports if an item.Id is not in its catalog")

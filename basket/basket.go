@@ -7,18 +7,6 @@ import (
 	"dev.acorello.it/go/supermarket-kata/money"
 )
 
-type quantity struct {
-	int
-}
-
-func Quantity(v int) (*quantity, error) {
-	const min, max = 1, 99
-	if v < min || v > max {
-		return nil, fmt.Errorf("Quantity q<=%d or q>%d. q==%v", v, min, max)
-	}
-	return &quantity{v}, nil
-}
-
 type Basket struct {
 	catalog Catalog
 	items   map[item.Id]int
@@ -78,4 +66,16 @@ func (my *Basket) ItemIdInCatalog(id item.Id) (*itemId, error) {
 		return nil, fmt.Errorf("item not in catalog %q", id)
 	}
 	return &itemId{id}, nil
+}
+
+type quantity struct {
+	int
+}
+
+func Quantity(v int) (*quantity, error) {
+	const min, max = 1, 99
+	if v < min || v > max {
+		return nil, fmt.Errorf("Quantity q<=%d or q>%d. q==%v", v, min, max)
+	}
+	return &quantity{v}, nil
 }

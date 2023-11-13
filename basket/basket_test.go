@@ -78,4 +78,17 @@ func TestBasket(t *testing.T) {
 		b.Remove(anItemId, qty(1))
 		require.Equal(t, zeroCents, b.Total())
 	})
+
+	t.Run("panic when using a nullish quantity", func(t *testing.T) {
+		b := _basket
+		t.Parallel()
+
+		anItem := catalog.RandomItem()
+		anItemId := must.Work(b.ItemIdInCatalog(anItem.Id))
+
+		doubiousQuantity, _ := basket.Quantity(-1)
+
+		require.Panics(t, func() { b.Put(anItemId, doubiousQuantity) }, "put panics")
+		require.Panics(t, func() { b.Remove(anItemId, doubiousQuantity) }, "remove panics")
+	})
 }

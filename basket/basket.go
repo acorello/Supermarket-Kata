@@ -11,12 +11,26 @@ type quantity struct {
 	int
 }
 
+// it happens to be zero but it should really be treated as null
+var nullishQty quantity
+var nullishItemId itemId
+
+func (q quantity) panicIfNullish() {
+	if q == nullishQty {
+		panic("nullish quantity")
+	}
+}
+
+func (q itemId) panicIfNullish() {
+	if q == nullishItemId {
+		panic("nullish itemId")
+	}
+}
+
 // TODO: add upper bound of 100
-// TODO: in Put or Remove, either skip or panic if we get a quantity of zero
 func Quantity(v int) (quantity, error) {
-	var z quantity
 	if v <= 0 {
-		return z, fmt.Errorf("Quantity <= 0: %v", v)
+		return nullishQty, fmt.Errorf("Quantity <= 0: %v", v)
 	}
 	return quantity{v}, nil
 }
@@ -43,6 +57,8 @@ func NewBasket(catalog Catalog) Basket {
 
 // Put increments the quantity of itemId by given amount; returns updated quantity.
 func (my *Basket) Put(id itemId, qty quantity) {
+	id.panicIfNullish()
+	qty.panicIfNullish()
 	my.items[id.value] += qty.int
 }
 
@@ -52,6 +68,8 @@ func (my *Basket) Put(id itemId, qty quantity) {
 //
 // Returns updated quantity.
 func (my *Basket) Remove(id itemId, qty quantity) {
+	id.panicIfNullish()
+	qty.panicIfNullish()
 	q := my.items[id.value]
 	r := q - qty.int
 	if r < 1 {

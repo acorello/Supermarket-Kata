@@ -21,8 +21,11 @@ var qty = must.DereFn(basket.Quantity)
 type T = *testing.T
 
 func TestBasket(t *testing.T) {
-	require.Panics(t, func() { basket.NewBasket(nil) },
-		"panic when given nil catalog")
+	t.Log("verify constructor rejects invalid arguments")
+	require.Panics(t, func() {
+		var nilCatalog basket.Catalog = nil
+		basket.NewBasket(nilCatalog)
+	}, "panic when given nil catalog")
 
 	_basket := basket.NewBasket(catalog)
 
@@ -38,7 +41,7 @@ func TestBasket(t *testing.T) {
 	// assuming anItem is immutable: sub-tests are reading it
 	anItem := catalog.RandomItem()
 	_anItemId, err := _basket.ItemIdInCatalog(anItem.Id)
-	require.NoErrorf(t, err, "Basket rejected %#v despite being in its catalog", anItem.Id)
+	require.NoErrorf(t, err, "%#v rejected despite being in its catalog", anItem.Id)
 	anItemId := *_anItemId
 
 	const minQty, maxQty = 1, 99
@@ -71,10 +74,9 @@ func TestBasket(t *testing.T) {
 		b := _basket // make copy, we're about to run concurrently!
 		t.Parallel()
 
-		require.NotEqual(t, anItem.Price, 0,
-			"if item.Price is zero the following tests would be false positives")
+		require.NotEqual(t, anItem.Price, 0, "following tests rely on item.Price != 0")
 
-		require.Equal(t, zeroCents, b.Total(), "empty basket total should be zero")
+		require.Equal(t, zeroCents, b.Total(), "total of empty basket should be zero")
 
 		b.Put(anItemId, qty(1))
 		require.Equal(t, anItem.Price, b.Total())
@@ -90,7 +92,7 @@ func TestBasket(t *testing.T) {
 
 		b.Remove(anItemId, qty(1))
 		require.Equal(t, zeroCents, b.Total(),
-			"removing an item from an empty basket doesn't change the total")
+			"total remains zero after removing items from empty basket")
 	})
 
 	t.Run("removing an item from an empty basket doesn't change the total", func(t T) {

@@ -1,21 +1,21 @@
 package must
 
-func Fn[Params, Res any](resOrError func(Params) (Res, error)) func(Params) Res {
-	return DereFn(func(p Params) (*Res, error) {
-		res, err := resOrError(p)
+func Fn[Arg, Res any](fn func(Arg) (Res, error)) func(Arg) Res {
+	return DereFn(func(p Arg) (*Res, error) {
+		res, err := fn(p)
 		return &res, err
 	})
 }
 
-func DereFn[Params, Res any, ResPtr *Res](resOrError func(Params) (ResPtr, error)) func(Params) Res {
-	resOrPanic := func(p Params) Res {
-		if v, err := resOrError(p); err != nil {
+func DereFn[Arg, Res any](fn func(Arg) (*Res, error)) func(Arg) Res {
+	panickyFn := func(p Arg) Res {
+		if v, err := fn(p); err != nil {
 			panic(err)
 		} else {
 			return *v
 		}
 	}
-	return resOrPanic
+	return panickyFn
 }
 
 func Work[T any](v T, err error) T {
@@ -25,7 +25,7 @@ func Work[T any](v T, err error) T {
 	return v
 }
 
-func WorkPtr[T any, P *T](v P, err error) T {
+func WorkPtr[T any](v *T, err error) T {
 	if err != nil {
 		panic(err)
 	}

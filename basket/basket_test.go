@@ -8,6 +8,7 @@ import (
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
 	"dev.acorello.it/go/supermarket-kata/must"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -126,6 +127,17 @@ func TestBasket_rejectsInvalidQuantity(t *testing.T) {
 		require.Error(t, err,
 			"did not return an error for %d", q)
 	}
+}
+
+func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
+	t.Parallel()
+	b := basket.NewBasket(catalog)
+
+	require.NoError(t, b.Put(anItem.Id, qty(1)))
+	require.Equal(t, anItem.Price, b.Total())
+
+	assert.Error(t, b.Put(anItem.Id, qty(maxQty)))
+	assert.Equal(t, anItem.Price, b.Total(), "total modified on invalid operation")
 }
 
 func evalAndDiscard(any) {}

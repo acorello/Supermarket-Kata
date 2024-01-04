@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"dev.acorello.it/go/supermarket-kata/basket"
+	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
 	"dev.acorello.it/go/supermarket-kata/must"
 	"dev.acorello.it/go/supermarket-kata/test_fixtures"
@@ -23,68 +24,83 @@ type T = *testing.T
 func TestBasket(t *testing.T) {
 	// a basket depends on a catalog
 	// -> verify that no basket can be created with invalid dependencies
-	t.Log("verify constructor rejects invalid arguments")
 	require.Panics(t, func() {
 		var nilCatalog basket.Catalog = nil
 		basket.NewBasket(nilCatalog)
 	}, "panic when given nil catalog")
 
-	// create a basket
-	_basket := basket.NewBasket(catalog)
+	t.Run("Putting an item not in catalog returns an error", func(t T) {
+		t.Parallel()
+		b := basket.NewBasket(catalog)
 
-	// basket method arguments must be validated using provided validation functions
-	// -> verify that validation functions reject invalid inputs
-	// -> verify that validation functions accept valid inputs
-	rejectsInvalidItemId(t, _basket)
+		invalidItem := item.Id("item-not-in-catalog")
+		err := b.Put(invalidItem, qty(1))
+		require.Error(t, err, "basket seems to have accepted an item not in catalog")
+	})
 
 	// assuming anItem is immutable: sub-tests are reading it
-	anItem := catalog.RandomItem()
-	_anItemId, err := _basket.ItemIdInCatalog(anItem.Id)
-	require.NoErrorf(t, err, "%#v rejected despite being in its catalog", anItem.Id)
-	anItemId := *_anItemId
+	someItems := catalog.RandomItems(2)
+	anItem, anotherItem := someItems[0], someItems[1]
+	require.NotEqual(t, anItem, anotherItem, "catalog should return a different item")
 
-	const minQty, maxQty = 1, 99
-	rejectsInvalidQuantity(t, minQty, maxQty)
-	acceptsValidQuantity(t, minQty, maxQty)
-
-	t.Run("Total() changes as we change an item quantity", func(t T) {
-		b := _basket // make copy, we're about to run concurrently!
+	t.Run("Total changes as we change an item quantity", func(t T) {
+		// TODO: rename b to basket…
 		t.Parallel()
+		b := basket.NewBasket(catalog)
 
+		// ASSUMPTIONS
 		require.Greater(t, anItem.Price, 1, "following tests rely on item.Price > 1")
-
 		require.Equal(t, zeroCents, b.Total(), "total of empty basket should be zero")
 
-		b.Put(anItemId, qty(1))
+		// TESTS
+		require.NoError(t, b.Put(anItem.Id, qty(1)))
 		require.Equal(t, anItem.Price, b.Total())
 
-		b.Put(anItemId, qty(2))
+		require.NoError(t, b.Put(anItem.Id, qty(2)))
 		require.Equal(t, anItem.Price*3, b.Total())
 
-		b.Remove(anItemId, qty(1))
+		require.NoError(t, b.Remove(anItem.Id, qty(1)))
 		require.Equal(t, anItem.Price*2, b.Total())
 
-		b.Remove(anItemId, qty(2))
+		require.NoError(t, b.Remove(anItem.Id, qty(2)))
 		require.Equal(t, zeroCents, b.Total())
 
-		b.Remove(anItemId, qty(1))
+		// removing a VALID ITEM NOT PRESENT in a NON-EMPTY BASKET returns error
+		require.Error(t, b.Remove(anotherItem.Id, qty(2)))
+		require.Equal(t, zeroCents, b.Total())
+
+		// BASKET NOW EMPTY, so should return an error
+		require.Error(t, b.Remove(anItem.Id, qty(1)))
 		require.Equal(t, zeroCents, b.Total(),
 			"total remains zero after removing items from empty basket")
 	})
 
-	t.Run("removing an item from an empty basket doesn't change the total", func(t T) {
-		b := _basket
-		t.Parallel()
+	t.Run("removing a VALID ITEM NOT PRESENT in a NON-EMPTY BASKET returns error",
+		func(t T) {
+			t.Parallel()
+			b := basket.NewBasket(catalog)
 
-		anItem := catalog.RandomItem()
-		anItemId := must.WorkPtr(b.ItemIdInCatalog(anItem.Id))
+			require.NoError(t, b.Put(anItem.Id, qty(1)))
 
-		b.Remove(anItemId, qty(1))
-		require.Equal(t, zeroCents, b.Total())
-	})
+			require.Error(t, b.Remove(anotherItem.Id, qty(1)))
+			require.Equal(t, anItem.Price, b.Total())
+		})
+
+	t.Run("removing a VALID ITEM from an EMPTY BASKET returns error",
+		func(t T) {
+			t.Parallel()
+			b := basket.NewBasket(catalog)
+
+			// BASKET NOW EMPTY, so should return an error
+			require.Error(t, b.Remove(anItem.Id, qty(1)))
+			require.Equal(t, zeroCents, b.Total(),
+				"total remains zero after removing items from empty basket")
+		})
 }
 
-func acceptsValidQuantity(t *testing.T, minQty int, maxQty int) {
+const minQty, maxQty = 1, 99
+
+func TestBasket_acceptsValidQuantity(t *testing.T) {
 	t.Logf("accepts all quantities q: %d <= q <= %d", minQty, maxQty)
 	for q := minQty; q <= maxQty; q++ {
 		qty, err := basket.Quantity(q)
@@ -97,7 +113,7 @@ func acceptsValidQuantity(t *testing.T, minQty int, maxQty int) {
 	}
 }
 
-func rejectsInvalidQuantity(t *testing.T, minQty int, maxQty int) {
+func TestBasket_rejectsInvalidQuantity(t *testing.T) {
 	someInvalidQuantities := [...]int{math.MinInt, math.MaxInt,
 		minQty - 2, minQty - 1, maxQty + 1, maxQty + 2,
 	}
@@ -111,13 +127,6 @@ func rejectsInvalidQuantity(t *testing.T, minQty int, maxQty int) {
 		require.Error(t, err,
 			"did not return an error for %d", q)
 	}
-}
-
-func rejectsInvalidItemId(t *testing.T, b basket.Basket) {
-	itemId, err := b.ItemIdInCatalog("item-not-in-catalog")
-	require.Error(t, err, "invalid item.Id passed validation")
-	require.Panics(t, func() { evalAndDiscard(*itemId) },
-		"non-nil basket.itemId returned for invalid item.Id")
 }
 
 func evalAndDiscard(any) {}

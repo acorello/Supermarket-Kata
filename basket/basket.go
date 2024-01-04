@@ -5,9 +5,13 @@ import (
 
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
+	"github.com/google/uuid"
 )
 
+type Id uuid.UUID
+
 type Basket struct {
+	Id
 	catalog Catalog
 	items   map[item.Id]int
 }
@@ -22,29 +26,43 @@ func NewBasket(catalog Catalog) Basket {
 		panic("nil catalog")
 	}
 	return Basket{
+		Id:      Id(uuid.New()),
 		catalog: catalog,
 		items:   make(map[item.Id]int),
 	}
 }
 
-// Put increments the quantity of itemId by given amount; returns updated quantity.
-func (my *Basket) Put(id itemId, qty quantity) {
-	my.items[id.value] += qty.int
+// Put increments the quantity of itemId by given amount.
+//
+// Returns error:
+//   - if item is not in catalog
+//   - TODO: if total quantity has exceeded reasonable maximum
+func (my *Basket) Put(id item.Id, qty quantity) error {
+	if !my.catalog.Has(id) {
+		return fmt.Errorf("item id %v not found in catalog", id)
+	}
+	my.items[id] += qty.int
+	return nil
 }
 
 // Remove decrements of given item by given quantity.
 // If quantity of items in basket reaches zero the item is removed.
-// Removing more items than present in basket is equivalent to removing all of them.
 //
-// Returns updated quantity.
-func (my *Basket) Remove(id itemId, qty quantity) {
-	q := my.items[id.value]
+// Returns error:
+//   - if item not found in basket
+//   - TODO: if quantity removed is greater than quantity in basket
+func (my *Basket) Remove(id item.Id, qty quantity) error {
+	q, found := my.items[id]
+	if !found {
+		return fmt.Errorf("item id %v not in basket", id)
+	}
 	r := q - qty.int
 	if r < 1 {
-		delete(my.items, id.value)
+		delete(my.items, id)
 	} else {
-		my.items[id.value] = r
+		my.items[id] = r
 	}
+	return nil
 }
 
 func (my *Basket) Total() money.Cents {
@@ -54,18 +72,6 @@ func (my *Basket) Total() money.Cents {
 		total += money.Cents(int(i.Price) * qty)
 	}
 	return total
-}
-
-type itemId struct {
-	value item.Id
-}
-
-// [ItemIdInCatalog] returns an [itemId] if given [item.Id] is present in Basket's [item.Catalog], error otherwise.
-func (my *Basket) ItemIdInCatalog(id item.Id) (*itemId, error) {
-	if !my.catalog.Has(id) {
-		return nil, fmt.Errorf("item not in catalog %q", id)
-	}
-	return &itemId{id}, nil
 }
 
 type quantity struct {

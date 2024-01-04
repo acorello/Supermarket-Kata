@@ -8,13 +8,14 @@ import (
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
 	"dev.acorello.it/go/supermarket-kata/must"
-	"dev.acorello.it/go/supermarket-kata/test_fixtures"
 	"github.com/stretchr/testify/require"
 )
 
 const zeroCents = money.Cents(0)
 
-var catalog = test_fixtures.Catalog()
+var catalog = item.FixedCatalog()
+var someItems = catalog.RandomItems(2)
+var anItem, anotherItem = someItems[0], someItems[1]
 
 var qty = must.DereFn(basket.Quantity)
 
@@ -39,8 +40,6 @@ func TestBasket(t *testing.T) {
 	})
 
 	// assuming anItem is immutable: sub-tests are reading it
-	someItems := catalog.RandomItems(2)
-	anItem, anotherItem := someItems[0], someItems[1]
 	require.NotEqual(t, anItem, anotherItem, "catalog should return a different item")
 
 	t.Run("Total changes as we change an item quantity", func(t T) {

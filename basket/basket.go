@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// TODO: extract and expose known domain errors (e.g. itemId not in catalog), to facilitate API error handling.
+
 type Id uuid.UUID
 
 type Basket struct {

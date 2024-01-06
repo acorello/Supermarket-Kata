@@ -55,17 +55,20 @@ func (my *Basket) Put(id item.Id, qty quantity) error {
 //
 // Returns error:
 //   - if item not found in basket
-//   - TODO: if quantity removed is greater than quantity in basket
-func (my *Basket) Remove(id item.Id, qty quantity) error {
-	q, found := my.items[id]
+//   - if quantity removed is greater than quantity in basket
+func (my *Basket) Remove(id item.Id, qtyToRemove quantity) error {
+	basketQty, found := my.items[id]
 	if !found {
 		return fmt.Errorf("item id %v not in basket", id)
 	}
-	r := q.int - qty.int
-	if r < 1 {
+	if qtyToRemove == basketQty {
 		delete(my.items, id)
+		return nil
+	}
+	if newQty, err := Quantity(basketQty.int - qtyToRemove.int); err != nil {
+		return fmt.Errorf("can not remove requested quantity %d: %v", qtyToRemove.int, err)
 	} else {
-		my.items[id] = quantity{r} // see TODO in docs
+		my.items[id] = *newQty
 	}
 	return nil
 }

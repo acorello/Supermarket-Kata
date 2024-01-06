@@ -140,4 +140,15 @@ func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
 	assert.Equal(t, anItem.Price, b.Total(), "total modified on invalid operation")
 }
 
+func TestBasket_rejectsRemovingTooManyItems(t *testing.T) {
+	t.Parallel()
+	b := basket.NewBasket(catalog)
+
+	require.NoError(t, b.Put(anItem.Id, qty(1)))
+	require.Equal(t, anItem.Price, b.Total())
+
+	assert.Error(t, b.Remove(anItem.Id, qty(2)))
+	assert.Equal(t, anItem.Price, b.Total(), "total modified on invalid operation")
+}
+
 func evalAndDiscard(any) {}

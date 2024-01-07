@@ -11,3 +11,5 @@ type Item struct {
 	Price money.Cents
 	Unit  string
 }
+
+type Quantity uint

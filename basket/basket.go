@@ -15,7 +15,7 @@ type Id uuid.UUID
 type Basket struct {
 	Id
 	catalog Catalog
-	items   map[item.Id]quantity
+	items   map[item.Id]item.Quantity
 }
 
 type Catalog interface {
@@ -30,26 +30,31 @@ func NewBasket(catalog Catalog) Basket {
 	return Basket{
 		Id:      Id(uuid.New()),
 		catalog: catalog,
-		items:   make(map[item.Id]quantity),
+		items:   make(map[item.Id]item.Quantity),
 	}
 }
+
+const MaxQuantity = 99
 
 // Put increments the quantity of itemId by given amount.
 //
 // Returns error:
 //   - if item is not in catalog
 //   - if total quantity has exceeded [MaxQuantity]
-func (my *Basket) Put(id item.Id, qty quantity) error {
+func (my *Basket) Put(id item.Id, qty item.Quantity) error {
 	if !my.catalog.Has(id) {
 		return fmt.Errorf("item id %v not found in catalog", id)
 	}
-	basketQty := my.items[id]
-	if newQty, err := Quantity(basketQty.int + qty.int); err != nil {
-		return err
-	} else {
-		my.items[id] = *newQty
-		return nil
+	if qty == 0 {
+		return fmt.Errorf("can't put zero items")
 	}
+	basketQty := my.items[id]
+	newQty := basketQty + qty
+	if newQty > MaxQuantity {
+		return fmt.Errorf("too many items; max allowed: %d", MaxQuantity)
+	}
+	my.items[id] = newQty
+	return nil
 }
 
 // Remove decrements of given item by given quantity.
@@ -58,19 +63,19 @@ func (my *Basket) Put(id item.Id, qty quantity) error {
 // Returns error:
 //   - if item not found in basket
 //   - if quantity removed is greater than quantity in basket
-func (my *Basket) Remove(id item.Id, qtyToRemove quantity) error {
+func (my *Basket) Remove(id item.Id, qty item.Quantity) error {
 	basketQty, found := my.items[id]
 	if !found {
 		return fmt.Errorf("item id %v not in basket", id)
 	}
-	if qtyToRemove == basketQty {
-		delete(my.items, id)
-		return nil
+	if qty > basketQty {
+		return fmt.Errorf("can not remove %d items; basket contains only %d", qty, basketQty)
 	}
-	if newQty, err := Quantity(basketQty.int - qtyToRemove.int); err != nil {
-		return fmt.Errorf("can not remove requested quantity %d: %v", qtyToRemove.int, err)
+	newQty := basketQty - qty
+	if newQty == 0 {
+		delete(my.items, id)
 	} else {
-		my.items[id] = *newQty
+		my.items[id] = newQty
 	}
 	return nil
 }
@@ -79,23 +84,7 @@ func (my *Basket) Total() money.Cents {
 	var total money.Cents
 	for id, qty := range my.items {
 		i, _ := my.catalog.Get(id)
-		total += money.Cents(int(i.Price) * qty.int)
+		total += i.Price * money.Cents(qty)
 	}
 	return total
-}
-
-const MinQuantity, MaxQuantity = 1, 99
-
-type quantity struct {
-	int
-}
-
-func Quantity(v int) (*quantity, error) {
-	if v < MinQuantity {
-		return nil, fmt.Errorf("Quantity %d smaller than minimum: %d", v, MinQuantity)
-	}
-	if v > MaxQuantity {
-		return nil, fmt.Errorf("Quantity %d greater than maximum: %d", v, MaxQuantity)
-	}
-	return &quantity{v}, nil
 }

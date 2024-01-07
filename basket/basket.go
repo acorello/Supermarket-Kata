@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// TODO: extract and expose known domain errors (e.g. itemId not in catalog), to facilitate API error handling.
+// TODO: extract and expose known domain errors (e.g. itemId not in catalog), to help clients handle errors.
 
 type Id uuid.UUID
 

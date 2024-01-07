@@ -43,11 +43,11 @@ func (my *Basket) Put(id item.Id, qty quantity) error {
 	if !my.catalog.Has(id) {
 		return fmt.Errorf("item id %v not found in catalog", id)
 	}
-	me := my.items[id]
-	if r, err := Quantity(me.int + qty.int); err != nil {
+	basketQty := my.items[id]
+	if newQty, err := Quantity(basketQty.int + qty.int); err != nil {
 		return err
 	} else {
-		my.items[id] = *r
+		my.items[id] = *newQty
 		return nil
 	}
 }

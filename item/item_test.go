@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var catalog = item.FixedCatalog()
+var catalog = item.FixedInventory()
 
 func TestFixedCatalog_RandomItems(t *testing.T) {
 	wanted := 1

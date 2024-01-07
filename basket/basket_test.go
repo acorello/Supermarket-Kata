@@ -12,7 +12,7 @@ import (
 
 const zeroCents = money.Cents(0)
 
-var catalog = item.FixedCatalog()
+var catalog = item.FixedInventory()
 var someItems = catalog.RandomItems(2)
 var anItem, anotherItem = someItems[0], someItems[1]
 
@@ -23,7 +23,7 @@ func TestBasket(t *testing.T) {
 	// a basket depends on a catalog
 	// -> verify that no basket can be created with invalid dependencies
 	require.Panics(t, func() {
-		var nilCatalog basket.Catalog = nil
+		var nilCatalog basket.Inventory = nil
 		basket.NewBasket(nilCatalog)
 	}, "panic when given nil catalog")
 

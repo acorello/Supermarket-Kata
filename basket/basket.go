@@ -14,16 +14,16 @@ type Id uuid.UUID
 
 type Basket struct {
 	Id
-	catalog Catalog
+	catalog Inventory
 	items   map[item.Id]item.Quantity
 }
 
-type Catalog interface {
-	Get(id item.Id) (item.Item, bool)
+type Inventory interface {
+	Discounts([]item.ItemIdQuantity) item.Discounting
 	Has(id item.Id) bool
 }
 
-func NewBasket(catalog Catalog) Basket {
+func NewBasket(catalog Inventory) Basket {
 	if catalog == nil {
 		panic("nil catalog")
 	}
@@ -81,10 +81,17 @@ func (my *Basket) Remove(id item.Id, qty item.Quantity) error {
 }
 
 func (my *Basket) Total() money.Cents {
-	var total money.Cents
+	var list []item.ItemIdQuantity
 	for id, qty := range my.items {
-		i, _ := my.catalog.Get(id)
-		total += i.Price * money.Cents(qty)
+		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
+	}
+	discounting := my.catalog.Discounts(list)
+	var total money.Cents
+	for _, discounted := range discounting.DiscountedItems {
+		total += discounted.Total()
+	}
+	for _, fullPrice := range discounting.FullPriceItems {
+		total += fullPrice.Total()
 	}
 	return total
 }

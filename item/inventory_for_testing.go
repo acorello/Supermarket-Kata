@@ -6,10 +6,10 @@ import (
 
 type InMemoryInventory map[Id]Item
 
-var catalog = newFixedInventory()
+var inventory = newFixedInventory()
 
 func FixedInventory() InMemoryInventory {
-	return catalog
+	return inventory
 }
 
 func newFixedInventory() InMemoryInventory {
@@ -30,7 +30,7 @@ func (me InMemoryInventory) RandomItems(count int) (result []Item) {
 		log.Fatalf("can't return %d items", count)
 	}
 	if count > me.Len() {
-		log.Fatalf("not enough elements in catalog. Wanted %d, got %d", count, me.Len())
+		log.Fatalf("not enough elements in inventory. Wanted %d, got %d", count, me.Len())
 	}
 	for _, item := range me {
 		result = append(result, item)
@@ -42,7 +42,7 @@ func (me InMemoryInventory) RandomItems(count int) (result []Item) {
 	return result
 }
 
-func (me InMemoryInventory) Has(id Id) bool {
+func (me InMemoryInventory) Knows(id Id) bool {
 	_, found := me[id]
 	return found
 }

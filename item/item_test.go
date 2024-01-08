@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var catalog = item.FixedInventory()
+var inventory = item.FixedInventory()
 
 func TestFixedCatalog_RandomItems(t *testing.T) {
 	wanted := 1
-	require.GreaterOrEqual(t, catalog.Len(), wanted)
+	require.GreaterOrEqual(t, inventory.Len(), wanted)
 
-	items := catalog.RandomItems(wanted)
+	items := inventory.RandomItems(wanted)
 	got := len(items)
 
 	assert.Equal(t, wanted, got)

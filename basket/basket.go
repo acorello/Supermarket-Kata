@@ -8,29 +8,32 @@ import (
 	"github.com/google/uuid"
 )
 
-// TODO: extract and expose known domain errors (e.g. itemId not in catalog), to help clients handle errors.
+// TODO: extract and expose known domain errors (e.g. itemId not in inventory), to help clients handle errors.
 
 type Id uuid.UUID
 
 type Basket struct {
 	Id
-	catalog Inventory
-	items   map[item.Id]item.Quantity
+	inventory Inventory
+	items     map[item.Id]item.Quantity
 }
 
+// A inventory is a list of items.
+// An inventory maps items to available quantities.
+// A discounter applies discounts to item prices.
 type Inventory interface {
 	PricedItems([]item.ItemIdQuantity) item.PricedItems
-	Has(id item.Id) bool
+	Knows(id item.Id) bool
 }
 
-func NewBasket(catalog Inventory) Basket {
-	if catalog == nil {
-		panic("nil catalog")
+func NewBasket(inventory Inventory) Basket {
+	if inventory == nil {
+		panic("nil inventory")
 	}
 	return Basket{
-		Id:      Id(uuid.New()),
-		catalog: catalog,
-		items:   make(map[item.Id]item.Quantity),
+		Id:        Id(uuid.New()),
+		inventory: inventory,
+		items:     make(map[item.Id]item.Quantity),
 	}
 }
 
@@ -39,22 +42,22 @@ const MaxQuantity = 99
 // Put increments the quantity of itemId by given amount.
 //
 // Returns error:
-//   - if item is not in catalog
+//   - if inventory doesn't know item.Id (never had such item, ever)
 //   - if total quantity has exceeded [MaxQuantity]
 func (my *Basket) Put(id item.Id, qty item.Quantity) error {
-	if !my.catalog.Has(id) {
-		return fmt.Errorf("item id %v not found in catalog", id)
+	if !my.inventory.Knows(id) {
+		return fmt.Errorf("unknown item.Id %v", id)
 	}
 	if qty == 0 {
 		return fmt.Errorf("can't put zero items")
 	}
 	basketQty := my.items[id]
-	newQty := basketQty + qty
-	if newQty > MaxQuantity {
-		return fmt.Errorf("too many items; max allowed: %d", MaxQuantity)
+	if newQty := basketQty + qty; newQty > MaxQuantity {
+		return fmt.Errorf("too many items; had %d, plus %d = %d; but max allowed: %d", basketQty, qty, newQty, MaxQuantity)
+	} else {
+		my.items[id] = newQty
+		return nil
 	}
-	my.items[id] = newQty
-	return nil
 }
 
 // Remove decrements of given item by given quantity.
@@ -85,7 +88,7 @@ func (my *Basket) Total() money.Cents {
 	for id, qty := range my.items {
 		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
 	}
-	discounting := my.catalog.PricedItems(list)
+	discounting := my.inventory.PricedItems(list)
 	var total money.Cents
 	for _, discounted := range discounting.Discounted {
 		total += discounted.Total()

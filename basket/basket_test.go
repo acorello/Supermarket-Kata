@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"dev.acorello.it/go/supermarket-kata/basket"
+	"dev.acorello.it/go/supermarket-kata/discount"
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
 	"github.com/stretchr/testify/assert"
@@ -13,8 +14,13 @@ import (
 const zeroCents = money.Cents(0)
 
 var inventory = item.FixedInventory()
+var noDiscounts = discount.NoDiscounts()
 var someItems = inventory.RandomItems(2)
 var anItem, anotherItem = someItems[0], someItems[1]
+
+func NewBasket() basket.Basket {
+	return basket.NewBasket(inventory, noDiscounts)
+}
 
 // shorhand for sub-test function signatures
 type T = *testing.T
@@ -23,13 +29,17 @@ func TestBasket(t *testing.T) {
 	// a basket depends on a inventory
 	// -> verify that no basket can be created with invalid dependencies
 	require.Panics(t, func() {
-		var nilCatalog basket.Inventory = nil
-		basket.NewBasket(nilCatalog)
+		var nilArg basket.Inventory = nil
+		basket.NewBasket(nilArg, noDiscounts)
 	}, "panic when given nil inventory")
+	require.Panics(t, func() {
+		var nilArg basket.Discounts = nil
+		basket.NewBasket(inventory, nilArg)
+	}, "panic when given nil discounts")
 
 	t.Run("Putting an item not in inventory returns an error", func(t T) {
 		t.Parallel()
-		b := basket.NewBasket(inventory)
+		b := NewBasket()
 
 		invalidItem := item.Id("item-not-in-inventory")
 		err := b.Put(invalidItem, 1)
@@ -42,7 +52,7 @@ func TestBasket(t *testing.T) {
 	t.Run("Total changes as we change an item quantity", func(t T) {
 		// TODO: rename b to basket…
 		t.Parallel()
-		b := basket.NewBasket(inventory)
+		b := NewBasket()
 
 		// ASSUMPTIONS
 		require.Greater(t, anItem.Price, 1, "following tests rely on item.Price > 1")
@@ -74,7 +84,7 @@ func TestBasket(t *testing.T) {
 	t.Run("removing a VALID ITEM NOT PRESENT in a NON-EMPTY BASKET returns error",
 		func(t T) {
 			t.Parallel()
-			b := basket.NewBasket(inventory)
+			b := NewBasket()
 
 			require.NoError(t, b.Put(anItem.Id, 1))
 
@@ -85,7 +95,7 @@ func TestBasket(t *testing.T) {
 	t.Run("removing a VALID ITEM from an EMPTY BASKET returns error",
 		func(t T) {
 			t.Parallel()
-			b := basket.NewBasket(inventory)
+			b := NewBasket()
 
 			// BASKET NOW EMPTY, so should return an error
 			require.Error(t, b.Remove(anItem.Id, 1))
@@ -96,7 +106,7 @@ func TestBasket(t *testing.T) {
 
 func TestBasket_rejectsPuttingZeroItems(t *testing.T) {
 	t.Parallel()
-	b := basket.NewBasket(inventory)
+	b := NewBasket()
 
 	initTotal := b.Total()
 	require.Error(t, b.Put(anItem.Id, 0))
@@ -105,7 +115,7 @@ func TestBasket_rejectsPuttingZeroItems(t *testing.T) {
 
 func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
 	t.Parallel()
-	b := basket.NewBasket(inventory)
+	b := NewBasket()
 
 	require.NoError(t, b.Put(anItem.Id, 1))
 	require.Equal(t, anItem.Price, b.Total())
@@ -116,7 +126,7 @@ func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
 
 func TestBasket_rejectsRemovingTooManyItems(t *testing.T) {
 	t.Parallel()
-	b := basket.NewBasket(inventory)
+	b := NewBasket()
 
 	require.NoError(t, b.Put(anItem.Id, 1))
 	require.Equal(t, anItem.Price, b.Total())

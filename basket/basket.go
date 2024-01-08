@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"dev.acorello.it/go/supermarket-kata/discount"
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type Id uuid.UUID
 type Basket struct {
 	Id
 	inventory Inventory
+	discounts Discounts
 	items     map[item.Id]item.Quantity
 }
 
@@ -24,13 +26,21 @@ type Inventory interface {
 	Knows(id item.Id) bool
 }
 
-func NewBasket(inventory Inventory) Basket {
+type Discounts interface {
+	Discount(items ...item.ItemQuantity) []discount.DiscountedItems
+}
+
+func NewBasket(inventory Inventory, discounts Discounts) Basket {
 	if inventory == nil {
-		log.Fatalf("nil parameter: inventory")
+		log.Panicf("nil parameter: inventory")
+	}
+	if discounts == nil {
+		log.Panicf("nil parameter: discounts")
 	}
 	return Basket{
 		Id:        Id(uuid.New()),
 		inventory: inventory,
+		discounts: discounts,
 		items:     make(map[item.Id]item.Quantity),
 	}
 }

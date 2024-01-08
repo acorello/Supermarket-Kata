@@ -42,16 +42,16 @@ func (me InMemoryInventory) Knows(id Id) bool {
 	return found
 }
 
-func (me InMemoryInventory) PricedItems(qtyIds []ItemIdQuantity) PricedItems {
-	var its []ItemQuantity
+func (me InMemoryInventory) PricedItems(qtyIds []ItemIdQuantity) []ItemQuantity {
+	var items []ItemQuantity
 	for _, qi := range qtyIds {
-		it, found := me[qi.Id]
+		anItem, found := me[qi.Id]
 		if !found {
-			log.Panicf("item %v not found; expected to be called from basket always with  valid ids", qi)
+			log.Panicf("item %v not found; client should invoke [Knows] to validate item.Id", qi)
 		}
-		its = append(its, ItemQuantity{Item: it, Quantity: qi.Quantity})
+		items = append(items, ItemQuantity{Item: anItem, Quantity: qi.Quantity})
 	}
-	return PricedItems{Discounted: nil, FullPrice: its}
+	return items
 }
 
 func (me InMemoryInventory) Len() int {

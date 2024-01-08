@@ -2,6 +2,7 @@ package basket
 
 import (
 	"fmt"
+	"log"
 
 	"dev.acorello.it/go/supermarket-kata/item"
 	"dev.acorello.it/go/supermarket-kata/money"
@@ -18,17 +19,14 @@ type Basket struct {
 	items     map[item.Id]item.Quantity
 }
 
-// A inventory is a list of items.
-// An inventory maps items to available quantities.
-// A discounter applies discounts to item prices.
 type Inventory interface {
-	PricedItems([]item.ItemIdQuantity) item.PricedItems
+	PricedItems([]item.ItemIdQuantity) []item.ItemQuantity
 	Knows(id item.Id) bool
 }
 
 func NewBasket(inventory Inventory) Basket {
 	if inventory == nil {
-		panic("nil inventory")
+		log.Fatalf("nil parameter: inventory")
 	}
 	return Basket{
 		Id:        Id(uuid.New()),
@@ -83,17 +81,13 @@ func (my *Basket) Remove(id item.Id, qty item.Quantity) error {
 	return nil
 }
 
-func (my *Basket) Total() money.Cents {
+func (my *Basket) Total() (total money.Cents) {
 	var list []item.ItemIdQuantity
 	for id, qty := range my.items {
 		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
 	}
-	discounting := my.inventory.PricedItems(list)
-	var total money.Cents
-	for _, discounted := range discounting.Discounted {
-		total += discounted.Total()
-	}
-	for _, fullPrice := range discounting.FullPrice {
+	items := my.inventory.PricedItems(list)
+	for _, fullPrice := range items {
 		total += fullPrice.Total()
 	}
 	return total

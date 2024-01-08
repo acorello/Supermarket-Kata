@@ -26,19 +26,4 @@ func (me ItemQuantity) Total() money.Cents {
 	return me.Price * money.Cents(me.Quantity)
 }
 
-type DiscountedItems struct {
-	Discount string
-	Items    []ItemQuantity
-	total    money.Cents
-}
-
-func (me DiscountedItems) Total() money.Cents {
-	return me.total
-}
-
-type PricedItems struct {
-	Discounted []DiscountedItems
-	FullPrice  []ItemQuantity
-}
-
 type Quantity uint

@@ -47,7 +47,7 @@ func (me InMemoryInventory) Has(id Id) bool {
 	return found
 }
 
-func (me InMemoryInventory) Discounts(qtyIds []ItemIdQuantity) Discounting {
+func (me InMemoryInventory) PricedItems(qtyIds []ItemIdQuantity) PricedItems {
 	var its []ItemQuantity
 	for _, qi := range qtyIds {
 		it, found := me[qi.Id]
@@ -56,7 +56,7 @@ func (me InMemoryInventory) Discounts(qtyIds []ItemIdQuantity) Discounting {
 		}
 		its = append(its, ItemQuantity{Item: it, Quantity: qi.Quantity})
 	}
-	return Discounting{DiscountedItems: nil, FullPriceItems: its}
+	return PricedItems{Discounted: nil, FullPrice: its}
 }
 
 func (me InMemoryInventory) Len() int {

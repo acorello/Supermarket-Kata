@@ -28,16 +28,17 @@ func (me ItemQuantity) Total() money.Cents {
 
 type DiscountedItems struct {
 	Discount string
-	Items    []Item
+	Items    []ItemQuantity
+	total    money.Cents
 }
 
 func (me DiscountedItems) Total() money.Cents {
-	panic("not implemented")
+	return me.total
 }
 
-type Discounting struct {
-	DiscountedItems []DiscountedItems
-	FullPriceItems  []ItemQuantity
+type PricedItems struct {
+	Discounted []DiscountedItems
+	FullPrice  []ItemQuantity
 }
 
 type Quantity uint

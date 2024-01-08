@@ -19,7 +19,7 @@ type Basket struct {
 }
 
 type Inventory interface {
-	Discounts([]item.ItemIdQuantity) item.Discounting
+	PricedItems([]item.ItemIdQuantity) item.PricedItems
 	Has(id item.Id) bool
 }
 
@@ -85,12 +85,12 @@ func (my *Basket) Total() money.Cents {
 	for id, qty := range my.items {
 		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
 	}
-	discounting := my.catalog.Discounts(list)
+	discounting := my.catalog.PricedItems(list)
 	var total money.Cents
-	for _, discounted := range discounting.DiscountedItems {
+	for _, discounted := range discounting.Discounted {
 		total += discounted.Total()
 	}
-	for _, fullPrice := range discounting.FullPriceItems {
+	for _, fullPrice := range discounting.FullPrice {
 		total += fullPrice.Total()
 	}
 	return total

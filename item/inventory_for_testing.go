@@ -20,11 +20,6 @@ func newFixedInventory() InMemoryInventory {
 	return InMemoryInventory(items_)
 }
 
-var fixedItems = []Item{
-	{Id: "beans", Price: 90, Unit: "u"},
-	{Id: "oranges", Price: 200, Unit: "kg"},
-}
-
 func (me InMemoryInventory) RandomItems(count int) (result []Item) {
 	if count < 0 {
 		log.Fatalf("can't return %d items", count)

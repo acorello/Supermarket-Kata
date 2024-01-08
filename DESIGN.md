@@ -43,7 +43,7 @@ I'll model the basket as an aggregate root with a _discount-plan_ collaborator.
 
 #### What if discounts overlap?
 
-As the catalog grows and the discount-plans become more sophisticated there may be an _accidental_ or _intentional_ case where an item is matched by multiple configured discounts.
+As the inventory grows and the discount-plans become more sophisticated there may be an _accidental_ or _intentional_ case where an item is matched by multiple configured discounts.
 
 I'm assuming we'll never want to apply more than one discount to an item, so what are we going to about that?
 

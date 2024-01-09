@@ -9,10 +9,6 @@ type DiscountId string
 
 type DiscountedItems struct {
 	DiscountId
-	Items []item.ItemQuantity
-	total money.Cents
-}
-
-func (me DiscountedItems) Total() money.Cents {
-	return me.total
+	Group []item.ItemQuantity
+	Total money.Cents
 }

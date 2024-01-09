@@ -124,13 +124,26 @@ func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
 	assert.Equal(t, anItem.Price, b.Total(), "total modified on invalid operation")
 }
 
-func TestBasket_rejectsRemovingTooManyItems(t *testing.T) {
+func TestBasket_Discounts(t *testing.T) {
 	t.Parallel()
-	b := NewBasket()
+	b := basket.NewBasket(inventory, discount.AllOneCentDiscount())
+
+	// basket applies discounts (allOneCentDiscount) if
+	// given anItem as a price greater than one
+	// and we put one count of such item
+	// the total is one (we tested before that with no-discounts Total == anItem.Price)
+	require.Greater(t, anItem.Price, money.Cents(1))
 
 	require.NoError(t, b.Put(anItem.Id, 1))
-	require.Equal(t, anItem.Price, b.Total())
+	require.Equal(t, money.Cents(1), b.Total())
 
-	assert.Error(t, b.Remove(anItem.Id, 2))
-	assert.Equal(t, anItem.Price, b.Total(), "total modified on invalid operation")
+	require.NoError(t, b.Put(anItem.Id, 1))
+	require.Equal(t, money.Cents(2), b.Total())
+
+	// also adding another item with a different price
+	require.Greater(t, anotherItem.Price, money.Cents(1))
+	require.NotEqual(t, anItem.Price, anotherItem.Price)
+
+	require.NoError(t, b.Put(anotherItem.Id, 1))
+	require.Equal(t, money.Cents(3), b.Total())
 }

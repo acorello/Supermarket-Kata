@@ -27,7 +27,7 @@ type Inventory interface {
 }
 
 type Discounts interface {
-	Discount(items ...item.ItemQuantity) []discount.DiscountedItems
+	Discount(items []item.ItemQuantity) ([]discount.DiscountedItems, []item.ItemQuantity)
 }
 
 func NewBasket(inventory Inventory, discounts Discounts) Basket {
@@ -97,8 +97,12 @@ func (my *Basket) Total() (total money.Cents) {
 		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
 	}
 	items := my.inventory.PricedItems(list)
-	for _, fullPrice := range items {
-		total += fullPrice.Total()
+	discounted, fullPrice := my.discounts.Discount(items)
+	for i := range fullPrice {
+		total += fullPrice[i].Total()
+	}
+	for i := range discounted {
+		total += discounted[i].Total
 	}
 	return total
 }

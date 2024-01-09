@@ -2,7 +2,6 @@ package basket
 
 import (
 	"fmt"
-	"log"
 
 	"dev.acorello.it/go/supermarket-kata/discount"
 	"dev.acorello.it/go/supermarket-kata/item"
@@ -32,10 +31,10 @@ type Discounts interface {
 
 func NewBasket(inventory Inventory, discounts Discounts) Basket {
 	if inventory == nil {
-		log.Panicf("nil parameter: inventory")
+		panic("nil parameter: inventory")
 	}
 	if discounts == nil {
-		log.Panicf("nil parameter: discounts")
+		panic("nil parameter: discounts")
 	}
 	return Basket{
 		Id:        Id(uuid.New()),

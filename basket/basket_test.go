@@ -123,25 +123,27 @@ func TestBasket_rejectsPuttingTooManyItems(t *testing.T) {
 }
 
 func TestBasket_Discounts(t *testing.T) {
-	t.Parallel()
-	b := basket.NewBasket(inventory, discount.AllOneCentDiscount())
+	t.Run("all one cent discount", func(t T) {
+		t.Parallel()
 
-	// basket applies discounts (allOneCentDiscount) if
-	// given anItem as a price greater than one
-	// and we put one count of such item
-	// the total is one (we tested before that with no-discounts Total == anItem.Price)
-	require.Greater(t, anItem.Price, money.Cents(1))
+		// GIVEN: basket uses all-one-cent-discount
+		b := basket.NewBasket(inventory, discount.AllOneCentDiscount())
+		// GIVEN: basket contains an item costing >1cent
+		require.Greater(t, anItem.Price, money.Cents(1))
+		require.NoError(t, b.Put(anItem.Id, 1))
 
-	require.NoError(t, b.Put(anItem.Id, 1))
-	require.Equal(t, money.Cents(1), b.Total())
+		// THEN: total is 1-cent
+		require.Equal(t, money.Cents(1), b.Total())
 
-	require.NoError(t, b.Put(anItem.Id, 1))
-	require.Equal(t, money.Cents(2), b.Total())
+		// and 2 cents with two counts of anItem
+		require.NoError(t, b.Put(anItem.Id, 1))
+		require.Equal(t, money.Cents(2), b.Total())
 
-	// also adding another item with a different price
-	require.Greater(t, anotherItem.Price, money.Cents(1))
-	require.NotEqual(t, anItem.Price, anotherItem.Price)
+		// adding another item with a different price still greater than 1-cent
+		require.Greater(t, anotherItem.Price, money.Cents(1))
+		require.NotEqual(t, anItem.Price, anotherItem.Price)
 
-	require.NoError(t, b.Put(anotherItem.Id, 1))
-	require.Equal(t, money.Cents(3), b.Total())
+		require.NoError(t, b.Put(anotherItem.Id, 1))
+		require.Equal(t, money.Cents(3), b.Total())
+	})
 }

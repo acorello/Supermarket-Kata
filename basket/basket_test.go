@@ -26,7 +26,6 @@ func NewBasket() basket.Basket {
 type T = *testing.T
 
 func TestBasket(t *testing.T) {
-	// a basket depends on a inventory
 	// -> verify that no basket can be created with invalid dependencies
 	require.Panics(t, func() {
 		var nilArg basket.Inventory = nil
@@ -46,7 +45,6 @@ func TestBasket(t *testing.T) {
 		require.Error(t, err, "basket seems to have accepted an item not in inventory")
 	})
 
-	// assuming anItem is immutable: sub-tests are reading it
 	require.NotEqual(t, anItem, anotherItem, "inventory should return a different item")
 
 	t.Run("Total changes as we change an item quantity", func(t T) {

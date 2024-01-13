@@ -24,10 +24,8 @@ var ineligibleItem = item.Item{
 	Unit:  "u",
 }
 
-type ItemIdQuantity item.ItemIdQuantity
-
 func TestThreeForTwoDiscount_Basket_With(t *testing.T) {
-	threeFor2 := discount.ThreeForTwo(eligibleItem.Id)
+	threeFor2 := discount.NewThreeForTwo(eligibleItem.Id)
 
 	for name, testCase := range tests {
 		tc := testCase

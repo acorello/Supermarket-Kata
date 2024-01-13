@@ -9,7 +9,7 @@ import (
 
 const IdThreeForTwo = DiscountId("three_for_two")
 
-func ThreeForTwo(ids ...item.Id) threeForTwo {
+func NewThreeForTwo(ids ...item.Id) threeForTwo {
 	// set item.Ids and sort
 	sorted := slices.Clone(ids)
 	slices.Sort(sorted)
@@ -25,36 +25,39 @@ type threeForTwo struct {
 func (my threeForTwo) Discount(basket item.ItemsQuantities) (output Output) {
 	const ElgibleQuantity = 3
 	const EquivalentQuantity = 2
-	var matchingItemQuantities item.ItemsQuantities
+	var candidateItemsQtys item.ItemsQuantities
 	for basketItem, qty := range basket {
-		if _, found := slices.BinarySearch(my.itemIds, basketItem.Id); !found {
+		if !my.isDiscounted(basketItem) {
 			output.Rest.Add(basketItem, qty)
 			continue
 		}
-		// I'm assuming the given input can contain duplicates
-		matchingItemQuantities.Add(basketItem, qty)
+		candidateItemsQtys.Add(basketItem, qty)
 	}
-	for matchingItem, qty := range matchingItemQuantities {
+	for candidateItem, qty := range candidateItemsQtys {
 		rem := qty % ElgibleQuantity
 		if rem > 0 {
-			output.Rest.Add(matchingItem, rem)
+			output.Rest.Add(candidateItem, rem)
 		}
-		tripletsCount := qty / ElgibleQuantity
-		if tripletsCount > 0 {
+		eligibleQty := qty / ElgibleQuantity
+		if eligibleQty > 0 {
 			var discountedItems item.ItemsQuantities
-			discountedItems.Add(matchingItem, qty-rem)
-			discountedTotal := matchingItem.Price *
-				EquivalentQuantity *
-				// TODO? model quantity so that it can be multiplied to money without cast
-				// perhaps interface { ~uint }, or type Quantity = uint, or bare uint
-				money.Cents(tripletsCount)
+			discountedItems.Add(candidateItem, qty-rem)
 			discountedGroup := DiscountedItems{
 				DiscountId: IdThreeForTwo,
 				Group:      discountedItems,
-				Total:      discountedTotal,
+
+				// TODO? model quantity so that it can be multiplied to money without cast
+				// perhaps interface { ~uint }, or type Quantity = uint, or bare uint
+				Total: candidateItem.Price * EquivalentQuantity *
+					money.Cents(eligibleQty),
 			}
 			output.Discounted.Append(discountedGroup)
 		}
 	}
 	return output
+}
+
+func (my threeForTwo) isDiscounted(i item.Item) bool {
+	_, found := slices.BinarySearch(my.itemIds, i.Id)
+	return found
 }

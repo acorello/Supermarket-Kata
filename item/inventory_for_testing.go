@@ -1,7 +1,10 @@
 package item
 
 import (
+	"fmt"
 	"log"
+
+	"dev.acorello.it/go/supermarket-kata/money"
 )
 
 type InMemoryInventory map[Id]Item
@@ -13,9 +16,16 @@ func FixedInventory() InMemoryInventory {
 }
 
 func newFixedInventory() InMemoryInventory {
+	prices := make(map[money.Cents]int, len(fixedItems))
 	items_ := make(map[Id]Item, len(fixedItems))
 	for _, item_ := range fixedItems {
 		items_[item_.Id] = item_
+		prices[item_.Price] += 1
+	}
+	for price, instances := range prices {
+		if instances > 1 {
+			panic(fmt.Sprintf("some tests rely on items returned by Random having distinct prices; found %v with price %v", instances, price))
+		}
 	}
 	return InMemoryInventory(items_)
 }
@@ -33,6 +43,9 @@ func (me InMemoryInventory) RandomItems(count int) (result []Item) {
 		if count <= 0 {
 			break
 		}
+	}
+	if count != 0 {
+		log.Fatalf("can't return %d items", count)
 	}
 	return result
 }

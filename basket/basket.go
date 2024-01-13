@@ -21,12 +21,12 @@ type Basket struct {
 }
 
 type Inventory interface {
-	PricedItems([]item.ItemIdQuantity) []item.ItemQuantity
+	Items([]item.Id) []item.Item
 	Knows(id item.Id) bool
 }
 
 type Discounts interface {
-	Discount(items []item.ItemQuantity) ([]discount.DiscountedItems, []item.ItemQuantity)
+	Discount(items item.ItemsQuantities) discount.Output
 }
 
 func NewBasket(inventory Inventory, discounts Discounts) Basket {
@@ -91,17 +91,32 @@ func (my *Basket) Remove(id item.Id, qty item.Quantity) error {
 }
 
 func (my *Basket) Total() (total money.Cents) {
-	var list []item.ItemIdQuantity
-	for id, qty := range my.items {
-		list = append(list, item.ItemIdQuantity{Id: id, Quantity: qty})
+	itemsQuantities := my.itemsQuantities()
+	output := my.discounts.Discount(itemsQuantities)
+	for i, q := range output.Rest {
+		total += i.Price * money.Cents(q)
 	}
-	items := my.inventory.PricedItems(list)
-	discounted, fullPrice := my.discounts.Discount(items)
-	for i := range fullPrice {
-		total += fullPrice[i].Total()
-	}
-	for i := range discounted {
-		total += discounted[i].Total
+	for _, g := range output.Discounted {
+		total += g.Total
 	}
 	return total
+}
+
+func (my *Basket) itemsQuantities() (res item.ItemsQuantities) {
+	ids := my.itemIds()
+	for _, itm := range my.inventory.Items(ids) {
+		res.Set(itm, my.items[itm.Id])
+	}
+	if len(res) < len(my.items) {
+		panic("inventory did not return all requested items")
+	}
+	return res
+}
+
+func (my *Basket) itemIds() []item.Id {
+	var list []item.Id
+	for id := range my.items {
+		list = append(list, id)
+	}
+	return list
 }

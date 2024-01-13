@@ -12,19 +12,16 @@ func AllOneCentDiscount() allOneCent {
 type allOneCent struct {
 }
 
-func (allOneCent) Discount(items []item.ItemQuantity) (
-	discounted []DiscountedItems,
-	rest []item.ItemQuantity,
-) {
+func (allOneCent) Discount(items item.ItemsQuantities) (output Output) {
 	const discountId = DiscountId("all-one-cent")
-	for _, i := range items {
+	for i, q := range items {
 		var group item.ItemsQuantities
-		group.Add(i.Item, i.Quantity)
-		discounted = append(discounted, DiscountedItems{
+		group.Add(i, q)
+		output.Discounted.Append(DiscountedItems{
 			DiscountId: discountId,
 			Group:      group,
-			Total:      1 * money.Cents(i.Quantity),
+			Total:      1 * money.Cents(q),
 		})
 	}
-	return discounted, nil
+	return output
 }

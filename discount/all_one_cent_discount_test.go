@@ -20,43 +20,31 @@ func TestAllOneCentDiscount(t *testing.T) {
 	require.Greater(t, anItem.Price, money.Cents(1))
 	require.Greater(t, anotherItem.Price, money.Cents(1))
 
-	discounted, undiscounted := discounter.Discount([]item.ItemQuantity{
-		{
-			Item:     anItem,
-			Quantity: 1,
-		},
+	output := discounter.Discount(item.ItemsQuantities{
+		anItem: 1,
 	})
-	assert.Nil(t, undiscounted)
-	assert.Len(t, discounted, 1)
-	discountedPrice := discounted[0].Total
+	assert.Nil(t, output.Rest)
+	assert.Len(t, output.Discounted, 1)
+	discountedPrice := output.Discounted[0].Total
 	require.Equal(t, money.Cents(1), discountedPrice)
 
-	discounted, undiscounted = discounter.Discount([]item.ItemQuantity{
-		{
-			Item:     anItem,
-			Quantity: 2,
-		},
+	output = discounter.Discount(item.ItemsQuantities{
+		anItem: 2,
 	})
-	assert.Nil(t, undiscounted)
-	assert.Len(t, discounted, 1)
-	discountedPrice = discounted[0].Total
+	assert.Nil(t, output.Rest)
+	assert.Len(t, output.Discounted, 1)
+	discountedPrice = output.Discounted[0].Total
 	require.Equal(t, money.Cents(2), discountedPrice)
 
-	discounted, undiscounted = discounter.Discount([]item.ItemQuantity{
-		{
-			Item:     anItem,
-			Quantity: 2,
-		},
-		{
-			Item:     anotherItem,
-			Quantity: 2,
-		},
+	output = discounter.Discount(item.ItemsQuantities{
+		anItem:      2,
+		anotherItem: 2,
 	})
-	assert.Nil(t, undiscounted)
-	assert.Len(t, discounted, 2)
+	assert.Nil(t, output.Rest)
+	assert.Len(t, output.Discounted, 2)
 
-	discountedPrice = discounted[0].Total
+	discountedPrice = output.Discounted[0].Total
 	require.Equal(t, money.Cents(2), discountedPrice)
-	discountedPrice = discounted[1].Total
+	discountedPrice = output.Discounted[1].Total
 	require.Equal(t, money.Cents(2), discountedPrice)
 }

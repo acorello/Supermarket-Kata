@@ -19,6 +19,13 @@ type ItemIdQuantity struct {
 
 type ItemsQuantities map[Item]Quantity
 
+func (m *ItemsQuantities) Set(i Item, q Quantity) {
+	if *m == nil {
+		*m = make(ItemsQuantities)
+	}
+	(*m)[i] = q
+}
+
 func (m *ItemsQuantities) Add(i Item, q Quantity) {
 	if *m == nil {
 		*m = make(ItemsQuantities)

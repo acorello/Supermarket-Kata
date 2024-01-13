@@ -9,6 +9,7 @@ func NoDiscounts() noDiscounts {
 	return noDiscounts{}
 }
 
-func (noDiscounts) Discount(items []item.ItemQuantity) (res []DiscountedItems, fullPrice []item.ItemQuantity) {
-	return nil, items
+func (noDiscounts) Discount(items item.ItemsQuantities) (output Output) {
+	output.Rest = items
+	return
 }

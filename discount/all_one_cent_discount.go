@@ -18,9 +18,11 @@ func (allOneCent) Discount(items []item.ItemQuantity) (
 ) {
 	const discountId = DiscountId("all-one-cent")
 	for _, i := range items {
+		var group item.ItemsQuantities
+		group.Add(i.Item, i.Quantity)
 		discounted = append(discounted, DiscountedItems{
 			DiscountId: discountId,
-			Group:      []item.ItemQuantity{i},
+			Group:      group,
 			Total:      1 * money.Cents(i.Quantity),
 		})
 	}

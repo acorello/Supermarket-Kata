@@ -7,8 +7,19 @@ import (
 
 type DiscountId string
 
+type Output struct {
+	Discounted DiscountedGroups
+	Rest       item.ItemsQuantities
+}
+
+type DiscountedGroups []DiscountedItems
+
+func (me *DiscountedGroups) Append(d DiscountedItems) {
+	*me = append(*me, d)
+}
+
 type DiscountedItems struct {
 	DiscountId
-	Group []item.ItemQuantity
+	Group item.ItemsQuantities
 	Total money.Cents
 }

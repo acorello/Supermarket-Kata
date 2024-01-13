@@ -19,3 +19,13 @@ func TestFixedCatalog_RandomItems(t *testing.T) {
 
 	assert.Equal(t, wanted, got)
 }
+
+func TestItemsQuantities_Add(t *testing.T) {
+	t.Run("nil accepts new elements", func(t *testing.T) {
+		var itemsQtys item.ItemsQuantities
+		require.Nil(t, itemsQtys)
+		itemsQtys.Add(item.Item{}, 1)
+		require.NotNil(t, itemsQtys)
+		require.Equal(t, itemsQtys[item.Item{}], item.Quantity(1))
+	})
+}

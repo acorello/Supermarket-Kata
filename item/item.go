@@ -17,8 +17,17 @@ type ItemIdQuantity struct {
 	Quantity
 }
 
+type ItemsQuantities map[Item]Quantity
+
+func (m *ItemsQuantities) Add(i Item, q Quantity) {
+	if *m == nil {
+		*m = make(ItemsQuantities)
+	}
+	(*m)[i] += q
+}
+
 type ItemQuantity struct {
-	Item
+	Item // TODO: embedded Item exposes Price; may look like the price of whole
 	Quantity
 }
 

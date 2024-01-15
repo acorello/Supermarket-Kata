@@ -79,8 +79,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity,
 					},
@@ -107,8 +107,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity,
 					},
@@ -126,8 +126,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity * 2,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity * 2,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity * 2,
 					},
@@ -143,8 +143,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity * 2,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity * 2,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity * 2,
 					},
@@ -162,8 +162,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity,
 					},
@@ -182,8 +182,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity,
 					},
@@ -203,8 +203,8 @@ var tests = map[string]testCase{
 		output: discount.Output{
 			Discounted: discount.DiscountedGroups{
 				{
-					DiscountId: discount.IdThreeForTwo,
-					Total:      eligibleItem.Price * equivalentQuantity,
+					Id:    discount.IdThreeForTwo,
+					Total: eligibleItem.Price * equivalentQuantity,
 					Group: item.ItemsQuantities{
 						eligibleItem: eligibleQuantity,
 					},

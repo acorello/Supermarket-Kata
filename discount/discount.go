@@ -5,21 +5,21 @@ import (
 	"dev.acorello.it/go/supermarket-kata/money"
 )
 
-type DiscountId string
+type Id string
 
 type Output struct {
 	Discounted DiscountedGroups
 	Rest       item.ItemsQuantities
 }
 
-type DiscountedGroups []DiscountedItems
+type DiscountedGroups []DiscountedGroup
 
-func (me *DiscountedGroups) Append(d DiscountedItems) {
+func (me *DiscountedGroups) Append(d DiscountedGroup) {
 	*me = append(*me, d)
 }
 
-type DiscountedItems struct {
-	DiscountId
+type DiscountedGroup struct {
+	Id
 	Group item.ItemsQuantities
 	Total money.Cents
 }

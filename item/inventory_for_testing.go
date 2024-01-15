@@ -27,7 +27,7 @@ func newFixedInventory() InMemoryInventory {
 			panic(fmt.Sprintf("some tests rely on items returned by Random having distinct prices; found %v with price %v", instances, price))
 		}
 	}
-	return InMemoryInventory(items_)
+	return items_
 }
 
 func (me InMemoryInventory) RandomItems(count int) (result []Item) {

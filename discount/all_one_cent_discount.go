@@ -12,15 +12,16 @@ func AllOneCentDiscount() allOneCent {
 type allOneCent struct {
 }
 
+const IdAllOneCent = Id("all-one-cent")
+
 func (allOneCent) Discount(items item.ItemsQuantities) (output Output) {
-	const discountId = DiscountId("all-one-cent")
 	for i, q := range items {
 		var group item.ItemsQuantities
 		group.Add(i, q)
-		output.Discounted.Append(DiscountedItems{
-			DiscountId: discountId,
-			Group:      group,
-			Total:      1 * money.Cents(q),
+		output.Discounted.Append(DiscountedGroup{
+			Id:    IdAllOneCent,
+			Group: group,
+			Total: 1 * money.Cents(q),
 		})
 	}
 	return output

@@ -5,6 +5,7 @@ import "dev.acorello.it/go/supermarket-kata/item"
 type noDiscounts struct {
 }
 
+//goland:noinspection GoExportedFuncWithUnexportedType
 func NoDiscounts() noDiscounts {
 	return noDiscounts{}
 }

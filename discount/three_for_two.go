@@ -7,7 +7,7 @@ import (
 	"dev.acorello.it/go/supermarket-kata/money"
 )
 
-const IdThreeForTwo = DiscountId("three_for_two")
+const IdThreeForTwo = Id("three_for_two")
 
 func NewThreeForTwo(ids ...item.Id) threeForTwo {
 	// set item.Ids and sort
@@ -42,9 +42,9 @@ func (my threeForTwo) Discount(basket item.ItemsQuantities) (output Output) {
 		if eligibleQty > 0 {
 			var discountedItems item.ItemsQuantities
 			discountedItems.Add(candidateItem, qty-rem)
-			discountedGroup := DiscountedItems{
-				DiscountId: IdThreeForTwo,
-				Group:      discountedItems,
+			discountedGroup := DiscountedGroup{
+				Id:    IdThreeForTwo,
+				Group: discountedItems,
 
 				// TODO? model quantity so that it can be multiplied to money without cast
 				// perhaps interface { ~uint }, or type Quantity = uint, or bare uint

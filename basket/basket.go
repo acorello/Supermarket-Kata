@@ -38,7 +38,7 @@ func NewBasket(inventory Inventory, discounts Discounts) Basket {
 	}
 	return Basket{
 		Id:        Id(uuid.New()),
-		inventory: inventory,
+		inventory: inventoryContract{inventory},
 		discounts: discounts,
 		items:     make(map[item.Id]item.Quantity),
 	}
@@ -107,9 +107,7 @@ func (my *Basket) itemsQuantities() (res item.ItemsQuantities) {
 	for _, itm := range my.inventory.Items(ids) {
 		res.Set(itm, my.items[itm.Id])
 	}
-	if len(res) < len(my.items) {
-		panic("inventory did not return all requested items")
-	}
+
 	return res
 }
 

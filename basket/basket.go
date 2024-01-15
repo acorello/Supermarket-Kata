@@ -78,14 +78,12 @@ func (my *Basket) Remove(id item.Id, qty item.Quantity) error {
 	if !found {
 		return fmt.Errorf("item id %v not in basket", id)
 	}
-	if qty > basketQty {
-		return fmt.Errorf("can not remove %d items; basket contains only %d", qty, basketQty)
-	}
-	newQty := basketQty - qty
-	if newQty == 0 {
+	if q := basketQty - qty; q > 0 {
+		my.items[id] = q
+	} else if q == 0 {
 		delete(my.items, id)
 	} else {
-		my.items[id] = newQty
+		return fmt.Errorf("can not remove %d items; basket contains only %d", qty, basketQty)
 	}
 	return nil
 }

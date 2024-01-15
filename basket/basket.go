@@ -33,12 +33,14 @@ func NewBasket(inventory Inventory, discounts Discounts) Basket {
 	if inventory == nil {
 		panic("nil parameter: inventory")
 	}
+	inventory = inventoryContract{inventory}
 	if discounts == nil {
 		panic("nil parameter: discounts")
 	}
+	discounts = discountsContract{discounts}
 	return Basket{
 		Id:        Id(uuid.New()),
-		inventory: inventoryContract{inventory},
+		inventory: inventory,
 		discounts: discounts,
 		items:     make(map[item.Id]item.Quantity),
 	}

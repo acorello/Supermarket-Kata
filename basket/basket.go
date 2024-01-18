@@ -51,7 +51,7 @@ const MaxQuantity = 99
 // Put increments the quantity of itemId by given amount.
 //
 // Returns error:
-//   - if inventory doesn't know item.Id (never had such item, ever)
+//   - if inventory doesn't know [item.Id] (never had such item, ever)
 //   - if total quantity has exceeded [MaxQuantity]
 func (my *Basket) Put(id item.Id, qty item.Quantity) error {
 	if !my.inventory.Knows(id) {

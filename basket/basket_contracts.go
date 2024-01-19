@@ -32,8 +32,11 @@ func (i inventoryContract) Items(ids []item.Id) (result []item.Item) {
 
 type discountsContract struct{ Discounts }
 
+// Discount should return exactly all items in exact quantities.
+//
+// No extra items. Items can be present partially discounted and partially full-price,
+// as long as the sum of all quantities is equal to the input quantity of that item.
 func (me discountsContract) Discount(items item.ItemsQuantities) (result discount.Output) {
-	// TODO: test contract violations are detected
 	sum := func(_ item.Item, l, r item.Quantity) item.Quantity { return l + r }
 
 	result = me.Discounts.Discount(items)
